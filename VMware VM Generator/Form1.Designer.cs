@@ -554,9 +554,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxWelcomeTopRight
             // 
+            pictureBoxWelcomeTopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxWelcomeTopRight.Location = new Point(622, 0);
             pictureBoxWelcomeTopRight.Name = "pictureBoxWelcomeTopRight";
             pictureBoxWelcomeTopRight.Size = new Size(85, 85);
+            pictureBoxWelcomeTopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxWelcomeTopRight.TabIndex = 4;
             pictureBoxWelcomeTopRight.TabStop = false;
             // 
@@ -726,9 +728,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep1TopRight
             // 
+            pictureBoxStep1TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep1TopRight.Location = new Point(622, 0);
             pictureBoxStep1TopRight.Name = "pictureBoxStep1TopRight";
             pictureBoxStep1TopRight.Size = new Size(85, 85);
+            pictureBoxStep1TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep1TopRight.TabIndex = 4;
             pictureBoxStep1TopRight.TabStop = false;
             // 
@@ -1063,9 +1067,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep2TopRight
             // 
+            pictureBoxStep2TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep2TopRight.Location = new Point(622, 0);
             pictureBoxStep2TopRight.Name = "pictureBoxStep2TopRight";
             pictureBoxStep2TopRight.Size = new Size(85, 85);
+            pictureBoxStep2TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep2TopRight.TabIndex = 4;
             pictureBoxStep2TopRight.TabStop = false;
             // 
@@ -1336,9 +1342,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep3TopRight
             // 
+            pictureBoxStep3TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep3TopRight.Location = new Point(622, 0);
             pictureBoxStep3TopRight.Name = "pictureBoxStep3TopRight";
             pictureBoxStep3TopRight.Size = new Size(85, 85);
+            pictureBoxStep3TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep3TopRight.TabIndex = 4;
             pictureBoxStep3TopRight.TabStop = false;
             // 
@@ -1625,9 +1633,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep4TopRight
             // 
+            pictureBoxStep4TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep4TopRight.Location = new Point(622, 0);
             pictureBoxStep4TopRight.Name = "pictureBoxStep4TopRight";
             pictureBoxStep4TopRight.Size = new Size(85, 85);
+            pictureBoxStep4TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep4TopRight.TabIndex = 4;
             pictureBoxStep4TopRight.TabStop = false;
             // 
@@ -1853,9 +1863,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep5TopRight
             // 
+            pictureBoxStep5TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep5TopRight.Location = new Point(622, 0);
             pictureBoxStep5TopRight.Name = "pictureBoxStep5TopRight";
             pictureBoxStep5TopRight.Size = new Size(85, 85);
+            pictureBoxStep5TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep5TopRight.TabIndex = 4;
             pictureBoxStep5TopRight.TabStop = false;
             // 
@@ -2152,9 +2164,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep6TopRight
             // 
+            pictureBoxStep6TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep6TopRight.Location = new Point(622, 0);
             pictureBoxStep6TopRight.Name = "pictureBoxStep6TopRight";
             pictureBoxStep6TopRight.Size = new Size(85, 85);
+            pictureBoxStep6TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep6TopRight.TabIndex = 4;
             pictureBoxStep6TopRight.TabStop = false;
             // 
@@ -2319,9 +2333,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxStep7TopRight
             // 
+            pictureBoxStep7TopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxStep7TopRight.Location = new Point(622, 0);
             pictureBoxStep7TopRight.Name = "pictureBoxStep7TopRight";
             pictureBoxStep7TopRight.Size = new Size(85, 85);
+            pictureBoxStep7TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxStep7TopRight.TabIndex = 4;
             pictureBoxStep7TopRight.TabStop = false;
             // 
@@ -2465,9 +2481,11 @@ namespace VMware_VM_Generator
             // 
             // pictureBoxFinishTopRight
             // 
+            pictureBoxFinishTopRight.BackColor = System.Drawing.Color.Transparent;
             pictureBoxFinishTopRight.Location = new Point(622, 0);
             pictureBoxFinishTopRight.Name = "pictureBoxFinishTopRight";
             pictureBoxFinishTopRight.Size = new Size(85, 85);
+            pictureBoxFinishTopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             pictureBoxFinishTopRight.TabIndex = 4;
             pictureBoxFinishTopRight.TabStop = false;
             // 
