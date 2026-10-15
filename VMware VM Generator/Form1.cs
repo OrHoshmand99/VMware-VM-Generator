@@ -791,8 +791,6 @@ namespace VMware_VM_Generator
             try { iconFolder?.BringToFront(); } catch { }
             try { iconHardDrive?.BringToFront(); } catch { }
 
-
-
             // Load 16x16 secondary icons
             if (iconFirmware != null) iconFirmware.Image = GetResourceImage("iconFirmware");
             if (iconProcessor != null) iconProcessor.Image = GetResourceImage("iconProcessor");
@@ -1160,7 +1158,7 @@ namespace VMware_VM_Generator
 
             if (driveDefault == "ide" && radioButtonIDE.Enabled)
                 radioButtonIDE.Checked = true;
-            else if (driveDefault == "scsi" && radioButtonSCSI.Enabled)
+            else if (driveDefault == "scsi" && radioButtonSCSI.Checked)
                 radioButtonSCSI.Checked = true;
             else if (driveDefault == "nvme" && radioButtonNVMe.Enabled)
                 radioButtonNVMe.Checked = true;
@@ -1255,7 +1253,72 @@ namespace VMware_VM_Generator
                 SetDefaultRecommendedTag();
             }
 
+            // Read and apply custom UI settings (Color and Font Name) safely from settings.ini
+            ApplyCustomUIsettings();
+
             ValidateStep1();
+        }
+
+        // Read and apply custom text color and font name safely from settings.ini [UI] section while preserving original control sizes and styles and enforcing color exemptions for controls
+        private void ApplyCustomUIsettings()
+        {
+            try
+            {
+                string colorName = ini.Read("TextColor", "UI");
+                Color? customTextColor = null;
+                if (!string.IsNullOrWhiteSpace(colorName))
+                {
+                    customTextColor = ColorTranslator.FromHtml(colorName);
+                }
+
+                string fontName = ini.Read("FontName", "UI");
+
+                ApplyUIStyleToControls(this, customTextColor, fontName);
+            }
+            catch
+            {
+                // Fallback if parsing fails
+            }
+        }
+
+        // Helper method to recursively apply text color and font name while keeping original size and style, and exempting buttons, input fields, and memory labels
+        private void ApplyUIStyleToControls(Control container, Color? color, string fontName)
+        {
+            foreach (Control ctrl in container.Controls)
+            {
+                if (ctrl is Button || ctrl is CustomButton || ctrl is TextBox || ctrl is ComboBox || ctrl is NumericUpDown)
+                {
+                    // Buttons, TextBoxes, ComboBoxes, and NumericUpDowns must always have black text
+                    ctrl.ForeColor = Color.Black;
+                }
+                else if (ctrl == labelRecommendedMin)
+                {
+                    ctrl.ForeColor = Color.Red;
+                }
+                else if (ctrl == labelRecommendedDefault)
+                {
+                    ctrl.ForeColor = Color.Green;
+                }
+                else if (ctrl == labelRecommendedMax)
+                {
+                    ctrl.ForeColor = Color.Blue;
+                }
+                else if (color.HasValue && (ctrl is Label || ctrl is CheckBox || ctrl is RadioButton || ctrl is GroupBox))
+                {
+                    ctrl.ForeColor = color.Value;
+                }
+
+                if (!string.IsNullOrWhiteSpace(fontName))
+                {
+                    // Preserve each control's original size and style (like Bold for titles)
+                    ctrl.Font = new Font(fontName, ctrl.Font.Size, ctrl.Font.Style);
+                }
+
+                if (ctrl.HasChildren)
+                {
+                    ApplyUIStyleToControls(ctrl, color, fontName);
+                }
+            }
         }
 
         private void SetDefaultRecommendedTag()
@@ -1460,7 +1523,6 @@ namespace VMware_VM_Generator
 
                 MakeControlsTransparent(activePanel);
 
-                // FIX: transparent background for all wizard icons like iconFloppy and iconCD - including iconFinish
                 try
                 {
                     var backgroundControl = this.Controls.Find($"pictureBox{pagePrefix}Background", true).FirstOrDefault() as Control
@@ -2124,15 +2186,12 @@ namespace VMware_VM_Generator
                 labelSummaryTitle.Text = titleWithVm;
 
             // Fix the label that displays SummaryTitleTemplate (the one above txtSummary)
-            // It could be named SummaryTitleTemplate, labelSummaryTemplate, or any label containing {vmName}
             try
             {
-                // Try to find control by exact name SummaryTitleTemplate
                 var summaryTemplateCtrl = this.Controls.Find("SummaryTitleTemplate", true).FirstOrDefault();
                 if (summaryTemplateCtrl != null)
                     summaryTemplateCtrl.Text = titleWithVm;
 
-                // Also check common alternative names
                 var altNames = new[] { "labelSummaryTemplate", "labelSummarySubtitle", "labelSummaryHeader" };
                 foreach (var alt in altNames)
                 {
@@ -2141,14 +2200,12 @@ namespace VMware_VM_Generator
                         ctrlAlt.Text = titleWithVm;
                 }
 
-                // Final fallback: any label in panelStep7 that contains {vmName} placeholder
                 if (panelStep7 != null)
                 {
                     foreach (Control panelCtrl in panelStep7.Controls)
                     {
                         if (panelCtrl is Label lbl && lbl.Text.Contains("{vmName}"))
                             lbl.Text = titleWithVm;
-                        // Check nested
                         foreach (Control child in panelCtrl.Controls)
                         {
                             if (child is Label lbl2 && lbl2.Text.Contains("{vmName}"))
