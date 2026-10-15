@@ -1347,10 +1347,14 @@ namespace VMware_VM_Generator
             return $"{mb / 1024} GB";
         }
 
+        // Loads a PNG with preserved alpha channel into a control
+        // For PictureBox, uses Image property to keep transparency
+        // For Panel, uses BackgroundImage
         private void LoadBackground(Control control, string imageName)
         {
             if (control == null) return;
-            control.BackColor = Color.Transparent;
+
+            // Resolve image path from Resources folder or base directory
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", imageName + ".png");
             if (!File.Exists(path))
             {
@@ -1363,17 +1367,40 @@ namespace VMware_VM_Generator
                 {
                     using (var tempImg = Image.FromFile(path))
                     {
-                        Bitmap bmp = new Bitmap(tempImg);
+                        // Create 32bpp ARGB bitmap to preserve alpha channel
+                        Bitmap bmp = new Bitmap(tempImg.Width, tempImg.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        using (Graphics g = Graphics.FromImage(bmp))
+                        {
+                            g.Clear(Color.Transparent);
+                            g.DrawImage(tempImg, 0, 0, tempImg.Width, tempImg.Height);
+                        }
+
                         if (control is PictureBox pb)
                         {
+                            // Clean up previous image to avoid GDI leak
+                            if (pb.Image != null)
+                            {
+                                var old = pb.Image;
+                                pb.Image = null;
+                                old.Dispose();
+                            }
                             pb.Image = bmp;
                             pb.SizeMode = PictureBoxSizeMode.StretchImage;
                             pb.BackColor = Color.Transparent;
                         }
                         else
                         {
+                            // For panels, use BackgroundImage with alpha support
+                            if (control.BackgroundImage != null)
+                            {
+                                var oldBg = control.BackgroundImage;
+                                control.BackgroundImage = null;
+                                oldBg.Dispose();
+                            }
                             control.BackgroundImage = bmp;
                             control.BackgroundImageLayout = ImageLayout.Stretch;
+                            // Panel BackColor must be transparent for child PictureBox to show parent
+                            control.BackColor = Color.Transparent;
                         }
                     }
                 }
@@ -1381,8 +1408,12 @@ namespace VMware_VM_Generator
             }
         }
 
+        // Loads all wizard frame images for a given step and fixes transparency hierarchy
+        // WinForms transparent BackColor only shows Parent background, not siblings
+        // So TopRight must be child of Top to correctly blend
         private void LoadPageLayout(string pagePrefix)
         {
+            // Load common background elements
             LoadBackground(this.Controls.Find($"panel{pagePrefix}Background", true).FirstOrDefault(), "WizardBackground");
             LoadBackground(this.Controls.Find($"pictureBox{pagePrefix}Background", true).FirstOrDefault(), "WizardBackground");
 
@@ -1392,11 +1423,56 @@ namespace VMware_VM_Generator
             LoadBackground(this.Controls.Find($"panel{pagePrefix}Left", true).FirstOrDefault(), "WizardLeft");
             LoadBackground(this.Controls.Find($"pictureBox{pagePrefix}Left", true).FirstOrDefault(), "WizardLeft");
 
-            LoadBackground(this.Controls.Find($"panel{pagePrefix}Top", true).FirstOrDefault(), "WizardTop");
-            LoadBackground(this.Controls.Find($"pictureBox{pagePrefix}Top", true).FirstOrDefault(), "WizardTop");
+            // Load top strip first (parent for TopRight)
+            var panelTop = this.Controls.Find($"panel{pagePrefix}Top", true).FirstOrDefault();
+            var picTop = this.Controls.Find($"pictureBox{pagePrefix}Top", true).FirstOrDefault() as PictureBox;
+            LoadBackground(panelTop, "WizardTop");
+            LoadBackground(picTop, "WizardTop");
 
-            LoadBackground(this.Controls.Find($"panel{pagePrefix}TopRight", true).FirstOrDefault(), "WizardTopRight");
-            LoadBackground(this.Controls.Find($"pictureBox{pagePrefix}TopRight", true).FirstOrDefault(), "WizardTopRight");
+            // Load top-right corner
+            var panelTopRight = this.Controls.Find($"panel{pagePrefix}TopRight", true).FirstOrDefault();
+            var picTopRight = this.Controls.Find($"pictureBox{pagePrefix}TopRight", true).FirstOrDefault() as PictureBox;
+
+            LoadBackground(panelTopRight, "WizardTopRight");
+            LoadBackground(picTopRight, "WizardTopRight");
+
+            // Fix transparency: make TopRight a child of Top so its transparent pixels show Top underneath
+            if (picTopRight != null)
+            {
+                Control parentForTransparency = null;
+
+                // Prefer PictureBox Top as parent if it has an image
+                if (picTop != null && picTop.Image != null)
+                    parentForTransparency = picTop;
+                else if (panelTop != null)
+                    parentForTransparency = panelTop;
+
+                if (parentForTransparency != null)
+                {
+                    // Preserve screen position when reparenting
+                    Point screenPos = picTopRight.PointToScreen(Point.Empty);
+                    Point parentPos = parentForTransparency.PointToScreen(Point.Empty);
+                    Point newLocation = new Point(screenPos.X - parentPos.X, screenPos.Y - parentPos.Y);
+
+                    picTopRight.Parent = parentForTransparency;
+                    picTopRight.Location = newLocation;
+                    picTopRight.BackColor = Color.Transparent;
+                    picTopRight.BringToFront();
+                }
+            }
+
+            // Same fix for panel version if used
+            if (panelTopRight != null && panelTop != null && panelTopRight.Parent != panelTop)
+            {
+                Point screenPos = panelTopRight.PointToScreen(Point.Empty);
+                Point parentPos = panelTop.PointToScreen(Point.Empty);
+                Point newLocation = new Point(screenPos.X - parentPos.X, screenPos.Y - parentPos.Y);
+
+                panelTopRight.Parent = panelTop;
+                panelTopRight.Location = newLocation;
+                panelTopRight.BackColor = Color.Transparent;
+                panelTopRight.BringToFront();
+            }
         }
 
         private void MakeControlsTransparent(Control container)
