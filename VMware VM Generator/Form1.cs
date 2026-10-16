@@ -1434,7 +1434,13 @@ namespace VMware_VM_Generator
                     {
                         picTopRight.Parent = panelTop;
                     }
-                    picTopRight.Location = new Point(panelTop.Width - picTopRight.Width, 0);
+                    // RTL fix: if interface is RTL, move image to left side
+                    bool isRtl = this.RightToLeft == RightToLeft.Yes;
+                    if (isRtl)
+                        picTopRight.Location = new Point(0, 0);
+                    else
+                        picTopRight.Location = new Point(panelTop.Width - picTopRight.Width, 0);
+
                     picTopRight.BackColor = Color.Transparent;
                     picTopRight.Visible = true;
                     picTopRight.BringToFront();
@@ -1940,12 +1946,33 @@ namespace VMware_VM_Generator
             bool rtl = direction.Equals("RTL", StringComparison.OrdinalIgnoreCase);
 
             this.RightToLeft = rtl ? RightToLeft.Yes : RightToLeft.No;
-            this.RightToLeftLayout = rtl;
+            // Critical fix: RightToLeftLayout automatically mirrors the entire Form and conflicts with LoadPageLayout
+            // We disable it and handle positioning manually in LoadPageLayout
+            this.RightToLeftLayout = false;
 
             foreach (Control ctrl in this.Controls)
                 ApplyDirectionToControl(ctrl, rtl);
 
             if (rtl) MirrorControls(this);
+
+            // Fix: refresh WizardTopRight position for current screen immediately after direction change
+            // Otherwise welcome screen stays on right until Next is clicked
+            try
+            {
+                string currentPrefix = "Welcome";
+                if (panelStep1 != null && panelStep1.Visible) currentPrefix = "Step1";
+                else if (panelStep2 != null && panelStep2.Visible) currentPrefix = "Step2";
+                else if (panelStep3 != null && panelStep3.Visible) currentPrefix = "Step3";
+                else if (panelStep4 != null && panelStep4.Visible) currentPrefix = "Step4";
+                else if (panelStep5 != null && panelStep5.Visible) currentPrefix = "Step5";
+                else if (panelStep6 != null && panelStep6.Visible) currentPrefix = "Step6";
+                else if (panelStep7 != null && panelStep7.Visible) currentPrefix = "Step7";
+                else if (panelFinish != null && panelFinish.Visible) currentPrefix = "Finish";
+                else if (panelWelcome != null && panelWelcome.Visible) currentPrefix = "Welcome";
+
+                LoadPageLayout(currentPrefix);
+            }
+            catch { }
         }
 
         private void MirrorControls(Control container)
@@ -1954,6 +1981,8 @@ namespace VMware_VM_Generator
             foreach (Control ctrl in container.Controls.Cast<Control>().ToArray())
             {
                 if (ctrl == trackBarMemory) continue;
+                // RTL fix: skip WizardTopRight images - they are handled in LoadPageLayout
+                if (ctrl is PictureBox pb && pb.Name.EndsWith("TopRight")) continue;
                 int newX = width - ctrl.Left - ctrl.Width;
                 ctrl.Left = newX;
                 if (ctrl.Controls.Count > 0) MirrorControls(ctrl);
