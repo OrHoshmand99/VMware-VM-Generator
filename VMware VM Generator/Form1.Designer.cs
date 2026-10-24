@@ -48,9 +48,9 @@ namespace VMware_VM_Generator
             btnWelcomeCancel = new CustomButton();
             labelWelcomeText = new Label();
             labelWelcomeTitle = new Label();
-            pictureBoxWelcomeTopRight = new PictureBox();
             panelWelcomeLeft = new Panel();
             panelWelcomeTop = new Panel();
+            pictureBoxWelcomeTopRight = new PictureBox();
             panelWelcomeBottom = new Panel();
             panelWelcomeBackground = new Panel();
             iconWelcome = new PictureBox();
@@ -65,12 +65,12 @@ namespace VMware_VM_Generator
             txtVMFolder = new TextBox();
             txtVMName = new TextBox();
             labelVMName = new Label();
-            pictureBoxStep1TopRight = new PictureBox();
             pictureBoxStep1Top = new PictureBox();
             pictureBoxStep1Bottom = new PictureBox();
             pictureBoxStep1Left = new PictureBox();
             panelStep1Left = new Panel();
             panelStep1Top = new Panel();
+            pictureBoxStep1TopRight = new PictureBox();
             panelStep1Bottom = new Panel();
             pictureBoxStep1Background = new PictureBox();
             panelStep1Background = new Panel();
@@ -98,13 +98,13 @@ namespace VMware_VM_Generator
             btnStep2Back = new CustomButton();
             btnStep2Next = new CustomButton();
             btnStep2Cancel = new CustomButton();
-            pictureBoxStep2TopRight = new PictureBox();
             pictureBoxStep2Top = new PictureBox();
             pictureBoxStep2Bottom = new PictureBox();
             pictureBoxStep2Left = new PictureBox();
             pictureBoxStep2Background = new PictureBox();
             panelStep2Left = new Panel();
             panelStep2Top = new Panel();
+            pictureBoxStep2TopRight = new PictureBox();
             panelStep2Bottom = new Panel();
             panelStep2Background = new Panel();
             panelStep3 = new Panel();
@@ -124,13 +124,13 @@ namespace VMware_VM_Generator
             btnStep3Back = new CustomButton();
             btnStep3Next = new CustomButton();
             btnStep3Cancel = new CustomButton();
-            pictureBoxStep3TopRight = new PictureBox();
             pictureBoxStep3Top = new PictureBox();
             pictureBoxStep3Bottom = new PictureBox();
             pictureBoxStep3Left = new PictureBox();
             pictureBoxStep3Background = new PictureBox();
             panelStep3Left = new Panel();
             panelStep3Top = new Panel();
+            pictureBoxStep3TopRight = new PictureBox();
             panelStep3Bottom = new Panel();
             panelStep3Background = new Panel();
             panelStep4 = new Panel();
@@ -152,12 +152,12 @@ namespace VMware_VM_Generator
             btnStep4Back = new CustomButton();
             btnStep4Next = new CustomButton();
             btnStep4Cancel = new CustomButton();
-            pictureBoxStep4TopRight = new PictureBox();
             pictureBoxStep4Top = new PictureBox();
             pictureBoxStep4Bottom = new PictureBox();
             pictureBoxStep4Left = new PictureBox();
             panelStep4Left = new Panel();
             panelStep4Top = new Panel();
+            pictureBoxStep4TopRight = new PictureBox();
             panelStep4Bottom = new Panel();
             pictureBoxStep4Background = new PictureBox();
             panelStep4Background = new Panel();
@@ -174,13 +174,13 @@ namespace VMware_VM_Generator
             btnStep5Back = new CustomButton();
             btnStep5Next = new CustomButton();
             btnStep5Cancel = new CustomButton();
-            pictureBoxStep5TopRight = new PictureBox();
             pictureBoxStep5Top = new PictureBox();
             pictureBoxStep5Bottom = new PictureBox();
             pictureBoxStep5Left = new PictureBox();
             pictureBoxStep5Background = new PictureBox();
             panelStep5Left = new Panel();
             panelStep5Top = new Panel();
+            pictureBoxStep5TopRight = new PictureBox();
             panelStep5Bottom = new Panel();
             panelStep5Background = new Panel();
             panelStep6 = new Panel();
@@ -202,13 +202,13 @@ namespace VMware_VM_Generator
             btnStep6Back = new CustomButton();
             btnStep6Next = new CustomButton();
             btnStep6Cancel = new CustomButton();
-            pictureBoxStep6TopRight = new PictureBox();
             pictureBoxStep6Top = new PictureBox();
             pictureBoxStep6Bottom = new PictureBox();
             pictureBoxStep6Left = new PictureBox();
             pictureBoxStep6Background = new PictureBox();
             panelStep6Left = new Panel();
             panelStep6Top = new Panel();
+            pictureBoxStep6TopRight = new PictureBox();
             panelStep6Bottom = new Panel();
             panelStep6Background = new Panel();
             panelStep7 = new Panel();
@@ -219,13 +219,13 @@ namespace VMware_VM_Generator
             btnStep7Back = new CustomButton();
             btnCreate = new CustomButton();
             btnStep7Cancel = new CustomButton();
-            pictureBoxStep7TopRight = new PictureBox();
             pictureBoxStep7Top = new PictureBox();
             pictureBoxStep7Bottom = new PictureBox();
             pictureBoxStep7Left = new PictureBox();
             pictureBoxStep7Background = new PictureBox();
             panelStep7Left = new Panel();
             panelStep7Top = new Panel();
+            pictureBoxStep7TopRight = new PictureBox();
             panelStep7Bottom = new Panel();
             panelStep7Background = new Panel();
             panelFinish = new Panel();
@@ -234,13 +234,13 @@ namespace VMware_VM_Generator
             buttonFinish = new CustomButton();
             labelFinishText = new Label();
             labelFinishTitle = new Label();
-            pictureBoxFinishTopRight = new PictureBox();
             pictureBoxFinishTop = new PictureBox();
             pictureBoxFinishBottom = new PictureBox();
             pictureBoxFinishLeft = new PictureBox();
             pictureBoxFinishBackground = new PictureBox();
             panelFinishLeft = new Panel();
             panelFinishTop = new Panel();
+            pictureBoxFinishTopRight = new PictureBox();
             panelFinishBottom = new Panel();
             panelFinishBackground = new Panel();
             iconFinish = new PictureBox();
@@ -263,10 +263,10 @@ namespace VMware_VM_Generator
             panelWelcomeBackground.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconWelcome).BeginInit();
             panelStep1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep1TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Left).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep1TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Background).BeginInit();
             panelStep1Background.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconFolder).BeginInit();
@@ -275,56 +275,56 @@ namespace VMware_VM_Generator
             memory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownMemory).BeginInit();
             firmwareType.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep2TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Left).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Background).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep2TopRight).BeginInit();
             panelStep3.SuspendLayout();
             groupBoxSoundCard.SuspendLayout();
             groupBoxSCSIIO.SuspendLayout();
             groupBoxNetwork.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep3TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Left).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Background).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep3TopRight).BeginInit();
             panelStep4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDriveCapacity).BeginInit();
             groupBoxVirtualDriveType.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep4TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Left).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep4TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Background).BeginInit();
             panelStep4Background.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconHardDrive).BeginInit();
             panelStep5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep5TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Left).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Background).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep5TopRight).BeginInit();
             panelStep6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureVMIcon).BeginInit();
             groupBoxShortcutType.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep6TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Left).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Background).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep6TopRight).BeginInit();
             panelStep7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep7TopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Top).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Bottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Left).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Background).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep7TopRight).BeginInit();
             panelFinish.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTopRight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTop).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishBottom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishLeft).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishBackground).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTopRight).BeginInit();
             panelFinishBackground.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconFinish).BeginInit();
             SuspendLayout();
@@ -552,16 +552,6 @@ namespace VMware_VM_Generator
             labelWelcomeTitle.TabIndex = 4;
             labelWelcomeTitle.Text = "Welcome to the VMware VM Generator wizard of {osName}.";
             // 
-            // pictureBoxWelcomeTopRight
-            // 
-            pictureBoxWelcomeTopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxWelcomeTopRight.Location = new Point(622, 0);
-            pictureBoxWelcomeTopRight.Name = "pictureBoxWelcomeTopRight";
-            pictureBoxWelcomeTopRight.Size = new Size(85, 85);
-            pictureBoxWelcomeTopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxWelcomeTopRight.TabIndex = 4;
-            pictureBoxWelcomeTopRight.TabStop = false;
-            // 
             // panelWelcomeLeft
             // 
             panelWelcomeLeft.Location = new Point(0, 85);
@@ -575,6 +565,16 @@ namespace VMware_VM_Generator
             panelWelcomeTop.Name = "panelWelcomeTop";
             panelWelcomeTop.Size = new Size(707, 85);
             panelWelcomeTop.TabIndex = 6;
+            // 
+            // pictureBoxWelcomeTopRight
+            // 
+            pictureBoxWelcomeTopRight.BackColor = Color.Transparent;
+            pictureBoxWelcomeTopRight.Location = new Point(622, 0);
+            pictureBoxWelcomeTopRight.Name = "pictureBoxWelcomeTopRight";
+            pictureBoxWelcomeTopRight.Size = new Size(85, 85);
+            pictureBoxWelcomeTopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxWelcomeTopRight.TabIndex = 4;
+            pictureBoxWelcomeTopRight.TabStop = false;
             // 
             // panelWelcomeBottom
             // 
@@ -696,45 +696,37 @@ namespace VMware_VM_Generator
             // 
             // labelVMFolder
             // 
+            labelVMFolder.AutoSize = true;
             labelVMFolder.BackColor = Color.Transparent;
             labelVMFolder.Location = new Point(152, 221);
             labelVMFolder.Name = "labelVMFolder";
-            labelVMFolder.Size = new Size(139, 23);
+            labelVMFolder.Size = new Size(139, 15);
             labelVMFolder.TabIndex = 4;
             labelVMFolder.Text = "Virtual machine location:";
             // 
             // txtVMFolder
             // 
-            txtVMFolder.Location = new Point(297, 218);
+            txtVMFolder.Location = new Point(306, 218);
             txtVMFolder.Name = "txtVMFolder";
-            txtVMFolder.Size = new Size(271, 23);
+            txtVMFolder.Size = new Size(262, 23);
             txtVMFolder.TabIndex = 5;
             // 
             // txtVMName
             // 
-            txtVMName.Location = new Point(297, 175);
+            txtVMName.Location = new Point(306, 175);
             txtVMName.Name = "txtVMName";
-            txtVMName.Size = new Size(271, 23);
+            txtVMName.Size = new Size(262, 23);
             txtVMName.TabIndex = 6;
             // 
             // labelVMName
             // 
+            labelVMName.AutoSize = true;
             labelVMName.BackColor = Color.Transparent;
             labelVMName.Location = new Point(152, 178);
             labelVMName.Name = "labelVMName";
-            labelVMName.Size = new Size(139, 23);
+            labelVMName.Size = new Size(126, 15);
             labelVMName.TabIndex = 7;
             labelVMName.Text = "Virtual machine name:";
-            // 
-            // pictureBoxStep1TopRight
-            // 
-            pictureBoxStep1TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep1TopRight.Location = new Point(622, 0);
-            pictureBoxStep1TopRight.Name = "pictureBoxStep1TopRight";
-            pictureBoxStep1TopRight.Size = new Size(85, 85);
-            pictureBoxStep1TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep1TopRight.TabIndex = 4;
-            pictureBoxStep1TopRight.TabStop = false;
             // 
             // pictureBoxStep1Top
             // 
@@ -773,6 +765,16 @@ namespace VMware_VM_Generator
             panelStep1Top.Name = "panelStep1Top";
             panelStep1Top.Size = new Size(707, 85);
             panelStep1Top.TabIndex = 6;
+            // 
+            // pictureBoxStep1TopRight
+            // 
+            pictureBoxStep1TopRight.BackColor = Color.Transparent;
+            pictureBoxStep1TopRight.Location = new Point(622, 0);
+            pictureBoxStep1TopRight.Name = "pictureBoxStep1TopRight";
+            pictureBoxStep1TopRight.Size = new Size(85, 85);
+            pictureBoxStep1TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep1TopRight.TabIndex = 4;
+            pictureBoxStep1TopRight.TabStop = false;
             // 
             // panelStep1Bottom
             // 
@@ -1065,16 +1067,6 @@ namespace VMware_VM_Generator
             btnStep2Cancel.Text = "Cancel";
             btnStep2Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep2TopRight
-            // 
-            pictureBoxStep2TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep2TopRight.Location = new Point(622, 0);
-            pictureBoxStep2TopRight.Name = "pictureBoxStep2TopRight";
-            pictureBoxStep2TopRight.Size = new Size(85, 85);
-            pictureBoxStep2TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep2TopRight.TabIndex = 4;
-            pictureBoxStep2TopRight.TabStop = false;
-            // 
             // pictureBoxStep2Top
             // 
             pictureBoxStep2Top.Location = new Point(0, 0);
@@ -1120,6 +1112,16 @@ namespace VMware_VM_Generator
             panelStep2Top.Name = "panelStep2Top";
             panelStep2Top.Size = new Size(707, 85);
             panelStep2Top.TabIndex = 6;
+            // 
+            // pictureBoxStep2TopRight
+            // 
+            pictureBoxStep2TopRight.BackColor = Color.Transparent;
+            pictureBoxStep2TopRight.Location = new Point(622, 0);
+            pictureBoxStep2TopRight.Name = "pictureBoxStep2TopRight";
+            pictureBoxStep2TopRight.Size = new Size(85, 85);
+            pictureBoxStep2TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep2TopRight.TabIndex = 4;
+            pictureBoxStep2TopRight.TabStop = false;
             // 
             // panelStep2Bottom
             // 
@@ -1340,16 +1342,6 @@ namespace VMware_VM_Generator
             btnStep3Cancel.Text = "Cancel";
             btnStep3Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep3TopRight
-            // 
-            pictureBoxStep3TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep3TopRight.Location = new Point(622, 0);
-            pictureBoxStep3TopRight.Name = "pictureBoxStep3TopRight";
-            pictureBoxStep3TopRight.Size = new Size(85, 85);
-            pictureBoxStep3TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep3TopRight.TabIndex = 4;
-            pictureBoxStep3TopRight.TabStop = false;
-            // 
             // pictureBoxStep3Top
             // 
             pictureBoxStep3Top.Location = new Point(0, 0);
@@ -1395,6 +1387,16 @@ namespace VMware_VM_Generator
             panelStep3Top.Name = "panelStep3Top";
             panelStep3Top.Size = new Size(707, 85);
             panelStep3Top.TabIndex = 6;
+            // 
+            // pictureBoxStep3TopRight
+            // 
+            pictureBoxStep3TopRight.BackColor = Color.Transparent;
+            pictureBoxStep3TopRight.Location = new Point(622, 0);
+            pictureBoxStep3TopRight.Name = "pictureBoxStep3TopRight";
+            pictureBoxStep3TopRight.Size = new Size(85, 85);
+            pictureBoxStep3TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep3TopRight.TabIndex = 4;
+            pictureBoxStep3TopRight.TabStop = false;
             // 
             // panelStep3Bottom
             // 
@@ -1631,16 +1633,6 @@ namespace VMware_VM_Generator
             btnStep4Cancel.Text = "Cancel";
             btnStep4Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep4TopRight
-            // 
-            pictureBoxStep4TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep4TopRight.Location = new Point(622, 0);
-            pictureBoxStep4TopRight.Name = "pictureBoxStep4TopRight";
-            pictureBoxStep4TopRight.Size = new Size(85, 85);
-            pictureBoxStep4TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep4TopRight.TabIndex = 4;
-            pictureBoxStep4TopRight.TabStop = false;
-            // 
             // pictureBoxStep4Top
             // 
             pictureBoxStep4Top.Location = new Point(0, 0);
@@ -1678,6 +1670,16 @@ namespace VMware_VM_Generator
             panelStep4Top.Name = "panelStep4Top";
             panelStep4Top.Size = new Size(707, 85);
             panelStep4Top.TabIndex = 6;
+            // 
+            // pictureBoxStep4TopRight
+            // 
+            pictureBoxStep4TopRight.BackColor = Color.Transparent;
+            pictureBoxStep4TopRight.Location = new Point(622, 0);
+            pictureBoxStep4TopRight.Name = "pictureBoxStep4TopRight";
+            pictureBoxStep4TopRight.Size = new Size(85, 85);
+            pictureBoxStep4TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep4TopRight.TabIndex = 4;
+            pictureBoxStep4TopRight.TabStop = false;
             // 
             // panelStep4Bottom
             // 
@@ -1861,16 +1863,6 @@ namespace VMware_VM_Generator
             btnStep5Cancel.Text = "Cancel";
             btnStep5Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep5TopRight
-            // 
-            pictureBoxStep5TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep5TopRight.Location = new Point(622, 0);
-            pictureBoxStep5TopRight.Name = "pictureBoxStep5TopRight";
-            pictureBoxStep5TopRight.Size = new Size(85, 85);
-            pictureBoxStep5TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep5TopRight.TabIndex = 4;
-            pictureBoxStep5TopRight.TabStop = false;
-            // 
             // pictureBoxStep5Top
             // 
             pictureBoxStep5Top.Location = new Point(0, 0);
@@ -1916,6 +1908,16 @@ namespace VMware_VM_Generator
             panelStep5Top.Name = "panelStep5Top";
             panelStep5Top.Size = new Size(707, 85);
             panelStep5Top.TabIndex = 6;
+            // 
+            // pictureBoxStep5TopRight
+            // 
+            pictureBoxStep5TopRight.BackColor = Color.Transparent;
+            pictureBoxStep5TopRight.Location = new Point(622, 0);
+            pictureBoxStep5TopRight.Name = "pictureBoxStep5TopRight";
+            pictureBoxStep5TopRight.Size = new Size(85, 85);
+            pictureBoxStep5TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep5TopRight.TabIndex = 4;
+            pictureBoxStep5TopRight.TabStop = false;
             // 
             // panelStep5Bottom
             // 
@@ -2162,16 +2164,6 @@ namespace VMware_VM_Generator
             btnStep6Cancel.Text = "Cancel";
             btnStep6Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep6TopRight
-            // 
-            pictureBoxStep6TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep6TopRight.Location = new Point(622, 0);
-            pictureBoxStep6TopRight.Name = "pictureBoxStep6TopRight";
-            pictureBoxStep6TopRight.Size = new Size(85, 85);
-            pictureBoxStep6TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep6TopRight.TabIndex = 4;
-            pictureBoxStep6TopRight.TabStop = false;
-            // 
             // pictureBoxStep6Top
             // 
             pictureBoxStep6Top.Location = new Point(0, 0);
@@ -2217,6 +2209,16 @@ namespace VMware_VM_Generator
             panelStep6Top.Name = "panelStep6Top";
             panelStep6Top.Size = new Size(707, 85);
             panelStep6Top.TabIndex = 6;
+            // 
+            // pictureBoxStep6TopRight
+            // 
+            pictureBoxStep6TopRight.BackColor = Color.Transparent;
+            pictureBoxStep6TopRight.Location = new Point(622, 0);
+            pictureBoxStep6TopRight.Name = "pictureBoxStep6TopRight";
+            pictureBoxStep6TopRight.Size = new Size(85, 85);
+            pictureBoxStep6TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep6TopRight.TabIndex = 4;
+            pictureBoxStep6TopRight.TabStop = false;
             // 
             // panelStep6Bottom
             // 
@@ -2331,16 +2333,6 @@ namespace VMware_VM_Generator
             btnStep7Cancel.Text = "Cancel";
             btnStep7Cancel.UseVisualStyleBackColor = true;
             // 
-            // pictureBoxStep7TopRight
-            // 
-            pictureBoxStep7TopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxStep7TopRight.Location = new Point(622, 0);
-            pictureBoxStep7TopRight.Name = "pictureBoxStep7TopRight";
-            pictureBoxStep7TopRight.Size = new Size(85, 85);
-            pictureBoxStep7TopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxStep7TopRight.TabIndex = 4;
-            pictureBoxStep7TopRight.TabStop = false;
-            // 
             // pictureBoxStep7Top
             // 
             pictureBoxStep7Top.Location = new Point(0, 0);
@@ -2386,6 +2378,16 @@ namespace VMware_VM_Generator
             panelStep7Top.Name = "panelStep7Top";
             panelStep7Top.Size = new Size(707, 85);
             panelStep7Top.TabIndex = 6;
+            // 
+            // pictureBoxStep7TopRight
+            // 
+            pictureBoxStep7TopRight.BackColor = Color.Transparent;
+            pictureBoxStep7TopRight.Location = new Point(622, 0);
+            pictureBoxStep7TopRight.Name = "pictureBoxStep7TopRight";
+            pictureBoxStep7TopRight.Size = new Size(85, 85);
+            pictureBoxStep7TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxStep7TopRight.TabIndex = 4;
+            pictureBoxStep7TopRight.TabStop = false;
             // 
             // panelStep7Bottom
             // 
@@ -2479,16 +2481,6 @@ namespace VMware_VM_Generator
             labelFinishTitle.TabIndex = 9;
             labelFinishTitle.Text = "Completing the VMware VM Generator wizard of {osName}.";
             // 
-            // pictureBoxFinishTopRight
-            // 
-            pictureBoxFinishTopRight.BackColor = System.Drawing.Color.Transparent;
-            pictureBoxFinishTopRight.Location = new Point(622, 0);
-            pictureBoxFinishTopRight.Name = "pictureBoxFinishTopRight";
-            pictureBoxFinishTopRight.Size = new Size(85, 85);
-            pictureBoxFinishTopRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            pictureBoxFinishTopRight.TabIndex = 4;
-            pictureBoxFinishTopRight.TabStop = false;
-            // 
             // pictureBoxFinishTop
             // 
             pictureBoxFinishTop.Location = new Point(0, 0);
@@ -2535,6 +2527,16 @@ namespace VMware_VM_Generator
             panelFinishTop.Size = new Size(707, 85);
             panelFinishTop.TabIndex = 6;
             // 
+            // pictureBoxFinishTopRight
+            // 
+            pictureBoxFinishTopRight.BackColor = Color.Transparent;
+            pictureBoxFinishTopRight.Location = new Point(622, 0);
+            pictureBoxFinishTopRight.Name = "pictureBoxFinishTopRight";
+            pictureBoxFinishTopRight.Size = new Size(85, 85);
+            pictureBoxFinishTopRight.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxFinishTopRight.TabIndex = 4;
+            pictureBoxFinishTopRight.TabStop = false;
+            // 
             // panelFinishBottom
             // 
             panelFinishBottom.Location = new Point(0, 454);
@@ -2561,11 +2563,11 @@ namespace VMware_VM_Generator
             // Form1
             // 
             ClientSize = new Size(707, 513);
+            Controls.Add(panelStep6);
+            Controls.Add(panelStep1);
             Controls.Add(panelStep7);
             Controls.Add(panelStep4);
-            Controls.Add(panelStep1);
             Controls.Add(panelStep5);
-            Controls.Add(panelStep6);
             Controls.Add(panelStep3);
             Controls.Add(panelStep2);
             Controls.Add(panelWelcome);
@@ -2597,10 +2599,10 @@ namespace VMware_VM_Generator
             ((System.ComponentModel.ISupportInitialize)iconWelcome).EndInit();
             panelStep1.ResumeLayout(false);
             panelStep1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep1TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Left).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep1TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep1Background).EndInit();
             panelStep1Background.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)iconFolder).EndInit();
@@ -2612,64 +2614,64 @@ namespace VMware_VM_Generator
             ((System.ComponentModel.ISupportInitialize)numericUpDownMemory).EndInit();
             firmwareType.ResumeLayout(false);
             firmwareType.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep2TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Left).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep2Background).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep2TopRight).EndInit();
             panelStep3.ResumeLayout(false);
             groupBoxSoundCard.ResumeLayout(false);
             groupBoxSCSIIO.ResumeLayout(false);
             groupBoxSCSIIO.PerformLayout();
             groupBoxNetwork.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep3TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Left).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep3Background).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep3TopRight).EndInit();
             panelStep4.ResumeLayout(false);
             panelStep4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDriveCapacity).EndInit();
             groupBoxVirtualDriveType.ResumeLayout(false);
             groupBoxVirtualDriveType.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep4TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Left).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep4TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep4Background).EndInit();
             panelStep4Background.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)iconHardDrive).EndInit();
             panelStep5.ResumeLayout(false);
             panelStep5.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep5TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Left).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep5Background).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep5TopRight).EndInit();
             panelStep6.ResumeLayout(false);
             panelStep6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureVMIcon).EndInit();
             groupBoxShortcutType.ResumeLayout(false);
             groupBoxShortcutType.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep6TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Left).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep6Background).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep6TopRight).EndInit();
             panelStep7.ResumeLayout(false);
             panelStep7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxStep7TopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Top).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Bottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Left).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxStep7Background).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxStep7TopRight).EndInit();
             panelFinish.ResumeLayout(false);
             panelFinish.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTopRight).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTop).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishBottom).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishLeft).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFinishBackground).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxFinishTopRight).EndInit();
             panelFinishBackground.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)iconFinish).EndInit();
             ResumeLayout(false);
