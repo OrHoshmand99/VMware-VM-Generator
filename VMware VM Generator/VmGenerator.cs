@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ namespace VMware_VM_Generator
         {
             public string VmName { get; set; }
             public int MemoryMb { get; set; }
-            public int NumVcpus { get; set; }
+            public int NumVcpus { get; set; } // Processor/socket count from UI
             public int CoresPerSocket { get; set; }
             public string Firmware { get; set; }
             public string NetworkType { get; set; }
@@ -19,16 +19,25 @@ namespace VMware_VM_Generator
             public string StorageControllerType { get; set; }
             public string ScsiVirtualDev { get; set; }
             public string DiskPath { get; set; }
+            public string IsoPath { get; set; }
+            public string IsoController { get; set; }
             public int FloppyCount { get; set; }
             public int IdeCdCount { get; set; }
             public int ScsiCdCount { get; set; }
             public int SataCdCount { get; set; }
             public string IconPath { get; set; }
 
-            // New: Required fields for real disk creation
+            // Hardware Version and Guest OS from settings.ini
+            public string HardwareVersion { get; set; } = "19";
+            public string GuestOs { get; set; } = "other-64";
+
+            // Network adapter type from settings.ini (conditional injection)
+            public string EthernetVirtualDev { get; set; }
+
+            // Required fields for real disk creation
             public int DiskCapacityGB { get; set; } = 40;
-            public bool AllocateAllSpace { get; set; } = false; // checkBoxAllocate
-            public bool SplitIntoFiles { get; set; } = false; // radioButtonSplit
+            public bool AllocateAllSpace { get; set; } = false;
+            public bool SplitIntoFiles { get; set; } = false;
 
             /// <summary>
             /// Correct mapping for -t parameter:
@@ -47,104 +56,234 @@ namespace VMware_VM_Generator
             }
         }
 
-        // Create VMX file only
+        // Create VMX file following the exact mandatory and structural template specifications
         public static void CreateVmxFile(string vmxFilePath, VmConfig config)
         {
             StringBuilder sb = new StringBuilder();
 
+            // 1. Mandatory base configuration lines
             sb.AppendLine(".encoding = \"UTF-8\"");
             sb.AppendLine("config.version = \"8\"");
-            sb.AppendLine("virtualHW.version = \"19\"");
-            sb.AppendLine($"displayname = \"{config.VmName}\"");
-            sb.AppendLine($"memsize = \"{config.MemoryMb}\"");
-            sb.AppendLine($"numvcpus = \"{config.NumVcpus}\"");
-            sb.AppendLine($"cpuid.coresPerSocket = \"{config.CoresPerSocket}\"");
+            sb.AppendLine("virtualHW.productCompatibility = \"hosted\"");
+            sb.AppendLine("pciBridge0.present = \"TRUE\"");
+            sb.AppendLine("pciBridge4.present = \"TRUE\"");
+            sb.AppendLine("pciBridge4.virtualDev = \"pcieRootPort\"");
+            sb.AppendLine("pciBridge4.functions = \"8\"");
+            sb.AppendLine("pciBridge5.present = \"TRUE\"");
+            sb.AppendLine("pciBridge5.virtualDev = \"pcieRootPort\"");
+            sb.AppendLine("pciBridge5.functions = \"8\"");
+            sb.AppendLine("pciBridge6.present = \"TRUE\"");
+            sb.AppendLine("pciBridge6.virtualDev = \"pcieRootPort\"");
+            sb.AppendLine("pciBridge6.functions = \"8\"");
+            sb.AppendLine("pciBridge7.present = \"TRUE\"");
+            sb.AppendLine("pciBridge7.virtualDev = \"pcieRootPort\"");
+            sb.AppendLine("pciBridge7.functions = \"8\"");
+            sb.AppendLine("vmci0.present = \"TRUE\"");
+            sb.AppendLine("hpet0.present = \"TRUE\"");
+            sb.AppendLine("powerType.powerOff = \"soft\"");
+            sb.AppendLine("powerType.powerOn = \"soft\"");
+            sb.AppendLine("powerType.suspend = \"soft\"");
+            sb.AppendLine("powerType.reset = \"soft\"");
+            sb.AppendLine("sound.present = \"TRUE\"");
+            sb.AppendLine("sound.fileName = \"-1\"");
+            sb.AppendLine("sound.autodetect = \"TRUE\"");
+            sb.AppendLine("scsi0.present = \"TRUE\"");
+            sb.AppendLine("ethernet0.present = \"TRUE\"");
+            sb.AppendLine("ethernet0.startConnected = \"TRUE\"");
+
+            // 2. Configurable hardware version and guest OS (with robust validation & fallback)
+            string hwVersion = string.IsNullOrWhiteSpace(config.HardwareVersion) ? "19" : config.HardwareVersion.Trim();
+            string guestOs = string.IsNullOrWhiteSpace(config.GuestOs) ? "other-64" : config.GuestOs.Trim();
+
+            sb.AppendLine($"virtualHW.version = \"{hwVersion}\"");
+            sb.AppendLine($"guestOS = \"{guestOs}\"");
+
+            // 3. Rigid preset optional lines
+            sb.AppendLine("mks.enable3d = \"TRUE\"");
+            sb.AppendLine("svga.graphicsMemoryKB = \"8388608\"");
+            sb.AppendLine("chipset.useAcpiBattery = \"TRUE\"");
+            sb.AppendLine("chipset.useApmBattery = \"TRUE\"");
+            sb.AppendLine("tools.syncTime = \"TRUE\"");
+            sb.AppendLine("isolation.tools.hgfs.disable = \"FALSE\"");
+            sb.AppendLine("hgfs.mapRootShare = \"TRUE\"");
+            sb.AppendLine("usb.present = \"TRUE\"");
+            sb.AppendLine("usb.generic.allowHID = \"TRUE\"");
+            sb.AppendLine("ehci.present = \"TRUE\"");
+            sb.AppendLine("usb_xhci.present = \"TRUE\"");
+
+            // 4. Conditional network adapter type (injected ONLY if explicitly defined in settings.ini)
+            if (!string.IsNullOrWhiteSpace(config.EthernetVirtualDev))
+            {
+                sb.AppendLine($"ethernet0.virtualDev = \"{config.EthernetVirtualDev.Trim()}\"");
+            }
+
+            // 5. User-defined settings (Calculating total vCPUs as Sockets * CoresPerSocket)
+            int sockets = Math.Max(config.NumVcpus, 1);
+            int coresPerSocket = Math.Max(config.CoresPerSocket, 1);
+            int totalVcpus = sockets * coresPerSocket;
+
+            sb.AppendLine($"displayName = \"{config.VmName}\"");
+            sb.AppendLine($"nvram = \"{config.VmName}.nvram\"");
             sb.AppendLine($"firmware = \"{config.Firmware}\"");
+            sb.AppendLine($"numvcpus = \"{totalVcpus}\"");
+            sb.AppendLine($"cpuid.coresPerSocket = \"{coresPerSocket}\"");
+            sb.AppendLine($"memsize = \"{config.MemoryMb}\"");
+            sb.AppendLine($"scsi0.virtualDev = \"{(string.IsNullOrEmpty(config.ScsiVirtualDev) ? "lsilogic" : config.ScsiVirtualDev)}\"");
+            sb.AppendLine($"sound.virtualDev = \"{config.SoundVirtualDev}\"");
+            sb.AppendLine($"ethernet0.connectionType = \"{config.NetworkType}\"");
 
-            // Sound Card
-            if (!string.IsNullOrEmpty(config.SoundVirtualDev) && config.SoundVirtualDev != "none")
-            {
-                sb.AppendLine("sound.present = \"TRUE\"");
-                sb.AppendLine("sound.autoDetect = \"TRUE\"");
-                sb.AppendLine($"sound.virtualDev = \"{config.SoundVirtualDev}\"");
-            }
-            else
-            {
-                sb.AppendLine("sound.present = \"FALSE\"");
-            }
-
-            // Network Connection
-            if (config.NetworkType != "none")
-            {
-                sb.AppendLine("ethernet0.present = \"TRUE\"");
-                sb.AppendLine("ethernet0.virtualDev = \"e1000e\"");
-                sb.AppendLine($"ethernet0.connectionType = \"{config.NetworkType}\"");
-                sb.AppendLine("ethernet0.startConnected = \"TRUE\"");
-            }
-            else
-            {
-                sb.AppendLine("ethernet0.present = \"FALSE\"");
-            }
-
-            // Storage Controller & Disk
+            // 6. Primary Storage Controller and Disk configuration
             string primaryController = config.StorageControllerType.ToLower();
 
             if (primaryController == "ide")
             {
                 sb.AppendLine("ide0:0.present = \"TRUE\"");
-                sb.AppendLine($"ide0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
                 sb.AppendLine("ide0:0.deviceType = \"disk\"");
+                sb.AppendLine($"ide0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
             }
             else if (primaryController == "scsi")
             {
                 sb.AppendLine("scsi0.present = \"TRUE\"");
-                sb.AppendLine($"scsi0.virtualDev = \"{config.ScsiVirtualDev}\"");
                 sb.AppendLine("scsi0:0.present = \"TRUE\"");
+                sb.AppendLine("scsi0:0.deviceType = \"scsi-hardDisk\"");
                 sb.AppendLine($"scsi0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
-                sb.AppendLine("scsi0:0.deviceType = \"disk\"");
             }
             else if (primaryController == "sata")
             {
                 sb.AppendLine("sata0.present = \"TRUE\"");
                 sb.AppendLine("sata0:0.present = \"TRUE\"");
+                sb.AppendLine("sata0:0.deviceType = \"sata-hardDisk\"");
                 sb.AppendLine($"sata0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
-                sb.AppendLine("sata0:0.deviceType = \"disk\"");
             }
             else if (primaryController == "nvme")
             {
                 sb.AppendLine("nvme0.present = \"TRUE\"");
                 sb.AppendLine("nvme0:0.present = \"TRUE\"");
-                sb.AppendLine($"nvme0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
                 sb.AppendLine("nvme0:0.deviceType = \"disk\"");
+                sb.AppendLine($"nvme0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
             }
 
-            // Floppy drives
-            for (int i = 0; i < config.FloppyCount; i++)
-                sb.AppendLine($"floppy{i}.present = \"TRUE\"");
-
-            // IDE CD/DVD drives
-            for (int i = 0; i < config.IdeCdCount; i++)
+            // 7. Floppy drives configuration (Present, empty, and disconnected at power on)
+            if (config.FloppyCount > 0)
             {
-                sb.AppendLine($"ide1:{i}.present = \"TRUE\"");
-                sb.AppendLine($"ide1:{i}.deviceType = \"cdrom-image\"");
-                sb.AppendLine($"ide1:{i}.autodetect = \"TRUE\"");
+                sb.AppendLine("floppy0.present = \"TRUE\"");
+                sb.AppendLine("floppy0.startConnected = \"FALSE\"");
             }
-
-            // SCSI CD/DVD drives
-            for (int i = 0; i < config.ScsiCdCount; i++)
+            if (config.FloppyCount > 1)
             {
-                sb.AppendLine($"scsi0:{i + 1}.present = \"TRUE\"");
-                sb.AppendLine($"scsi0:{i + 1}.deviceType = \"cdrom-image\"");
+                sb.AppendLine("floppy1.present = \"TRUE\"");
+                sb.AppendLine("floppy1.startConnected = \"FALSE\"");
             }
 
-            // SATA CD/DVD drives
-            for (int i = 0; i < config.SataCdCount; i++)
+            string isoCtrl = (config.IsoController ?? "").Trim().ToLower();
+            bool hasIso = !string.IsNullOrEmpty(config.IsoPath);
+
+            // Auto-detect isoCtrl if empty based on available CD counts or primary controller
+            if (hasIso && string.IsNullOrEmpty(isoCtrl))
             {
-                sb.AppendLine($"sata0:{i + 1}.present = \"TRUE\"");
-                sb.AppendLine($"sata0:{i + 1}.deviceType = \"cdrom-image\"");
+                if (config.SataCdCount > 0 || primaryController == "sata" || primaryController == "nvme")
+                    isoCtrl = "sata";
+                else if (config.IdeCdCount > 0 || primaryController == "ide")
+                    isoCtrl = "ide";
+                else if (config.ScsiCdCount > 0 || primaryController == "scsi")
+                    isoCtrl = "scsi";
+                else
+                    isoCtrl = "sata"; // Default fallback for modern VMs
             }
 
-            // Custom icon if present
+            // 8. IDE CD/DVD drives configuration (Max 3: ide0:1, ide1:0, ide1:1)
+            int ideCdRequested = Math.Max(config.IdeCdCount, 0);
+            int totalIdeDrives = (hasIso && isoCtrl == "ide") ? Math.Max(ideCdRequested, 1) : ideCdRequested;
+            int ideCdLimit = Math.Min(totalIdeDrives, 3);
+            int ideAssignedCount = 0;
+
+            for (int i = 0; i < ideCdLimit; i++)
+            {
+                string ideKey = i == 0 ? "ide0:1" : (i == 1 ? "ide1:0" : "ide1:1");
+                bool isIsoSlot = (ideAssignedCount == 0 && hasIso && isoCtrl == "ide");
+
+                sb.AppendLine($"{ideKey}.present = \"TRUE\"");
+                if (isIsoSlot)
+                {
+                    sb.AppendLine($"{ideKey}.deviceType = \"cdrom-image\"");
+                    sb.AppendLine($"{ideKey}.fileName = \"{config.IsoPath}\"");
+                    sb.AppendLine($"{ideKey}.startConnected = \"TRUE\"");
+                }
+                else
+                {
+                    sb.AppendLine($"{ideKey}.deviceType = \"cdrom-image\"");
+                }
+                ideAssignedCount++;
+            }
+
+            // 9. SCSI CD/DVD drives configuration (Max 10 drives, skipping reserved scsi0:7)
+            int scsiCdRequested = Math.Max(config.ScsiCdCount, 0);
+            int totalScsiDrives = (hasIso && isoCtrl == "scsi") ? Math.Max(scsiCdRequested, 1) : scsiCdRequested;
+            int scsiCdLimit = Math.Min(totalScsiDrives, 10);
+            int scsiAssignedCount = 0;
+
+            for (int i = 1; scsiAssignedCount < scsiCdLimit && i <= 11; i++)
+            {
+                if (i == 7) continue; // Index 7 is reserved for the SCSI controller itself
+
+                string scsiKey = $"scsi0:{i}";
+                bool isIsoSlot = (scsiAssignedCount == 0 && hasIso && isoCtrl == "scsi");
+
+                sb.AppendLine($"{scsiKey}.present = \"TRUE\"");
+                if (isIsoSlot)
+                {
+                    sb.AppendLine($"{scsiKey}.deviceType = \"cdrom-image\"");
+                    sb.AppendLine($"{scsiKey}.fileName = \"{config.IsoPath}\"");
+                    sb.AppendLine($"{scsiKey}.startConnected = \"TRUE\"");
+                }
+                else
+                {
+                    sb.AppendLine($"{scsiKey}.deviceType = \"cdrom-image\"");
+                }
+                scsiAssignedCount++;
+            }
+
+            // 10. SATA CD/DVD drives configuration (Max 10 drives, preventing duplicate empty slots when ISO takes the first slot)
+            int sataCdRequested = Math.Max(config.SataCdCount, 0);
+            int totalSataDrives = (hasIso && isoCtrl == "sata") ? Math.Max(sataCdRequested, 1) : sataCdRequested;
+            int sataCdLimit = Math.Min(totalSataDrives, 10);
+            int sataAssignedCount = 0;
+
+            if (sataCdLimit > 0)
+            {
+                if (primaryController != "sata")
+                {
+                    sb.AppendLine("sata0.present = \"TRUE\"");
+                }
+
+                // If primary controller is SATA, disk is sata0:0, so first CD starts at sata0:1.
+                // Otherwise, first CD starts at sata0:0.
+                int startSataIndex = (primaryController == "sata") ? 1 : 0;
+
+                for (int i = 0; i < sataCdLimit; i++)
+                {
+                    int index = startSataIndex + i;
+                    if (index > 10) break;
+
+                    string sataKey = $"sata0:{index}";
+                    bool isIsoSlot = (sataAssignedCount == 0 && hasIso && isoCtrl == "sata");
+
+                    sb.AppendLine($"{sataKey}.present = \"TRUE\"");
+                    if (isIsoSlot)
+                    {
+                        sb.AppendLine($"{sataKey}.deviceType = \"cdrom-image\"");
+                        sb.AppendLine($"{sataKey}.fileName = \"{config.IsoPath}\"");
+                        sb.AppendLine($"{sataKey}.startConnected = \"TRUE\"");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"{sataKey}.deviceType = \"cdrom-image\"");
+                    }
+                    sataAssignedCount++;
+                }
+            }
+
+            // 11. Custom icon if present
             if (!string.IsNullOrEmpty(config.IconPath))
             {
                 string iconFileName = Path.GetFileName(config.IconPath);
@@ -156,7 +295,6 @@ namespace VMware_VM_Generator
 
         /// <summary>
         /// Create real virtual disk using vmware-vdiskmanager.exe
-        /// Throws exception with marker that will be caught in Form1 and translated via Hebrew.ini
         /// </summary>
         public static void CreateVirtualDisk(VmConfig config, string vmwareExePath)
         {
@@ -201,7 +339,6 @@ namespace VMware_VM_Generator
                     string output = proc.StandardError.ReadToEnd() + "\n" + proc.StandardOutput.ReadToEnd();
                     string lower = output.ToLower();
 
-                    // So Form1 can identify error type via Hebrew.ini - order matters
                     if (lower.Contains("already exists") || lower.Contains("already_exists") || lower.Contains("file exists") || lower.Contains("0xc"))
                     {
                         throw new IOException("FILE_ALREADY_EXISTS: File already exists - " + output);
@@ -218,24 +355,21 @@ namespace VMware_VM_Generator
             }
         }
 
-        // Unified method - this is what Form1 should call
+        // Unified method
         public static void CreateVirtualMachine(string vmxFilePath, VmConfig config, string vmwareExePath = null)
         {
-            // 1. Create VMX
             CreateVmxFile(vmxFilePath, config);
 
-            // 2. If VMware path is provided, also create real disk
             if (!string.IsNullOrEmpty(vmwareExePath))
             {
                 CreateVirtualDisk(config, vmwareExePath);
             }
         }
 
-        // Backward compatibility - old call without path
+        // Backward compatibility
         public static void CreateVirtualMachine(string vmxFilePath, VmConfig config)
         {
             CreateVmxFile(vmxFilePath, config);
-            // No disk creation to avoid breaking old code. Previous dummy file bug removed.
         }
     }
 }
