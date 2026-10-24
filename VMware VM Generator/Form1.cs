@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections.Generic;
 
 namespace VMware_VM_Generator
 {
@@ -18,6 +19,7 @@ namespace VMware_VM_Generator
         private bool isUpdatingProgrammatically = false;
         private string baseVmDirectory = "";
         private string currentIconPath = "";
+        private int currentIconIndex = 0; // Track exact icon index selected by the user
 
         // Pending action variables for post-wizard execution upon finishing
         private string pendingVmxPath = "";
@@ -25,14 +27,52 @@ namespace VMware_VM_Generator
         private string pendingVmwarePath = "";
 
         // Per-control suffix overrides loaded from language file
-        private readonly System.Collections.Generic.Dictionary<string, string> controlRecommendedSuffix =
-      new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private readonly System.Collections.Generic.Dictionary<string, string> controlNotSupportedSuffix =
-          new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> controlRecommendedSuffix =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> controlNotSupportedSuffix =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // Localized suffix texts (fallback to English defaults)
         private string localizedNotSupported = "(Not supported)";
         private string localizedRecommended = "(Recommended)";
+
+        // Safe RTL title bar fix: title bar RTL with right-aligned text
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_LAYOUTRTL = 0x00400000;
+                const int WS_EX_NOINHERITLAYOUT = 0x00100000;
+                const int WS_EX_RTLREADING = 0x00002000;
+                const int WS_EX_RIGHT = 0x00001000;
+
+                CreateParams cp = base.CreateParams;
+                if (this.RightToLeft == RightToLeft.Yes)
+                {
+                    cp.ExStyle |= WS_EX_LAYOUTRTL | WS_EX_NOINHERITLAYOUT | WS_EX_RTLREADING | WS_EX_RIGHT;
+                }
+                return cp;
+            }
+        }
+
+        // Helper method to set title with proper RTL embedding
+        private void SetFormTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                this.Text = title;
+                return;
+            }
+            string clean = title.TrimStart((char)0x200F, (char)0x200E, (char)0x202A, (char)0x202B, (char)0x202C, (char)0x202D, (char)0x202E);
+            if (this.RightToLeft == RightToLeft.Yes)
+            {
+                this.Text = ((char)0x202B).ToString() + clean + ((char)0x202C).ToString();
+            }
+            else
+            {
+                this.Text = clean;
+            }
+        }
 
         private readonly int[] memoryStops = new int[]
         {
@@ -47,19 +87,72 @@ namespace VMware_VM_Generator
         private int recommendedDefault;
         private int recommendedMax;
 
-        // P/Invoke for native Windows Icon Picker dialog and extraction
+        // P/Invoke for native Windows Icon Picker dialog and high-quality multi-resolution icon extraction
         [DllImport("shell32.dll", EntryPoint = "PickIconDlg", CharSet = CharSet.Auto)]
         private static extern bool PickIconDlg(IntPtr hwndOwner, StringBuilder pszIconPath, int cchIconPath, ref int piIconIndex);
 
-        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
-        private static extern uint ExtractIconEx(string szFileName, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int PrivateExtractIcons(
+            string lpszFile,
+            int nIconIndex,
+            int cxIcon,
+            int cyIcon,
+            IntPtr[] phicon,
+            int[] piconid,
+            int nIcons,
+            int flags
+        );
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int DestroyIcon(IntPtr hIcon);
 
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(int nIndex);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+        private const int WM_SETICON = 0x0080;
+        private const int ICON_SMALL = 0;
+        private const int ICON_BIG = 1;
+        private const int SM_CXSMICON = 49;
+        private const int SM_CXICON = 11;
+        private const int WM_DPICHANGED = 0x02E0;
+
+        private IntPtr currentSmallIconHandle = IntPtr.Zero;
+        private IntPtr currentLargeIconHandle = IntPtr.Zero;
+
+        // P/Invoke for reading PE resources to extract native icon layers and color depths
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr FindResource(IntPtr hModule, IntPtr lpName, IntPtr lpType);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LoadResource(IntPtr hModule, IntPtr hResInfo);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LockResource(IntPtr hResData);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern uint SizeofResource(IntPtr hModule, IntPtr hResInfo);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool EnumResourceNames(IntPtr hModule, IntPtr lpszType, EnumResNameProc lpEnumFunc, IntPtr lParam);
+
+        private delegate bool EnumResNameProc(IntPtr hModule, IntPtr lpszType, IntPtr lpszName, IntPtr lParam);
+
         public Form1()
         {
             InitializeComponent();
+            pictureVMIcon.SizeMode = PictureBoxSizeMode.Zoom;
 
             // Reduce flicker by enabling double-buffering and using WS_EX_COMPOSITED
             try
@@ -94,23 +187,6 @@ namespace VMware_VM_Generator
                 }
             }
             catch { }
-
-            // Force Form1 to use the primary executable's embedded icon resource
-            try
-            {
-                string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                using (Icon mainExeIcon = Icon.ExtractAssociatedIcon(exePath))
-                {
-                    if (mainExeIcon != null)
-                    {
-                        this.Icon = (Icon)mainExeIcon.Clone();
-                    }
-                }
-            }
-            catch
-            {
-                // Keep default if extraction fails
-            }
 
             // Welcome screen buttons
             btnWelcomeBack.Click += btnWelcomeBack_Click;
@@ -153,12 +229,10 @@ namespace VMware_VM_Generator
             btnCreate.Click += (s, e) => {
                 try
                 {
-                    // 1. Construct the target VMX file path based on user input folder and VM name
                     string vmFolder = txtVMFolder.Text.Trim();
                     string vmName = txtVMName.Text.Trim();
                     if (string.IsNullOrWhiteSpace(vmName)) vmName = "New Virtual Machine";
 
-                    // Ensure directory exists
                     if (!Directory.Exists(vmFolder))
                     {
                         Directory.CreateDirectory(vmFolder);
@@ -166,64 +240,101 @@ namespace VMware_VM_Generator
 
                     string vmxFilePath = Path.Combine(vmFolder, vmName + ".vmx");
 
-                    // Extract Network selection properly
                     string networkSelection = "nat";
                     if (radioButtonBridged.Checked) networkSelection = "bridged";
                     else if (radioButtonHostOnly.Checked) networkSelection = "hostonly";
                     else if (radioButtonNoNetwork.Checked) networkSelection = "none";
 
-                    // 2. Gather all configuration parameters from Form controls
+                    // Read hardware version from the INI file (Hardware Version section), fallback to "19" if empty
+                    string hwVersionIni = ini.Read("HardwareVersion", "Hardware Version");
+                    if (string.IsNullOrWhiteSpace(hwVersionIni)) hwVersionIni = "19";
+
+                    // Read network adapter type from INI file if explicitly defined
+                    string iniEthernetDev = ini.Read("ethernet0.virtualDev", "Network");
+
+                    // Read OS-Type from settings.ini [General] section, fallback to "other-64" if empty
+                    string osTypeIni = ini.Read("OS-Type", "General");
+                    if (string.IsNullOrWhiteSpace(osTypeIni)) osTypeIni = "other-64";
+
+                    // Read ISO file path from [BootCD] section in settings.ini[cite: 1, 3]
+                    string isoFileName = ini.Read("OS-ISO", "BootCD");
+                    string isoFullPath = "";
+                    if (!string.IsNullOrWhiteSpace(isoFileName))
+                    {
+                        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                        string combinedPath = Path.Combine(baseDir, isoFileName);
+                        isoFullPath = File.Exists(combinedPath) ? combinedPath : isoFileName;
+                    }
+
+                    // Get processor count and cores per processor safely
+                    int processors = comboNumberOfProcessors.SelectedItem is int p ? p : (int.TryParse(comboNumberOfProcessors.Text, out int parsedP) ? parsedP : 1);
+                    int coresPerProcessor = comboBoxNumberOfCoresPerProcessor.SelectedItem is int c ? c : (int.TryParse(comboBoxNumberOfCoresPerProcessor.Text, out int parsedC) ? parsedC : 1);
+
+                    // Read CD/DVD counts from UI controls
+                    int ideCdCount = (int)numericUpDownCDIDECount.Value;
+                    int scsiCdCount = (int)numericUpDownCDSCSICount.Value;
+                    int sataCdCount = (int)numericUpDownCDSATACount.Value;
+
+                    // Enforce minimum 1 drive for the controller hosting the boot OS ISO to prevent invalid 0 count
+                    string bootController = ini.Read("OS-Controller", "BootCD").ToUpper();
+                    if (!string.IsNullOrWhiteSpace(isoFullPath))
+                    {
+                        if (bootController == "IDE" && ideCdCount < 1)
+                        {
+                            ideCdCount = 1;
+                            numericUpDownCDIDECount.Value = 1;
+                        }
+                        else if (bootController == "SCSI" && scsiCdCount < 1)
+                        {
+                            scsiCdCount = 1;
+                            numericUpDownCDSCSICount.Value = 1;
+                        }
+                        else if (bootController == "SATA" && sataCdCount < 1)
+                        {
+                            sataCdCount = 1;
+                            numericUpDownCDSATACount.Value = 1;
+                        }
+                    }
+
                     var config = new VirtualMachineGenerator.VmConfig
                     {
                         VmName = vmName,
                         MemoryMb = (int)numericUpDownMemory.Value,
-                        NumVcpus = comboNumberOfProcessors.SelectedItem is int p ? p : (int.TryParse(comboNumberOfProcessors.Text, out int parsedP) ? parsedP : 1),
-                        CoresPerSocket = comboBoxNumberOfCoresPerProcessor.SelectedItem is int c ? c : (int.TryParse(comboBoxNumberOfCoresPerProcessor.Text, out int parsedC) ? parsedC : 1),
+                        NumVcpus = processors, // UI socket count; VmGenerator calculates total vCPUs as Sockets * CoresPerSocket
+                        CoresPerSocket = coresPerProcessor,
 
-                        // Firmware selection from form radio buttons
                         Firmware = uefi.Checked ? "efi" : "bios",
-
-                        // Network selection
                         NetworkType = networkSelection,
 
-                        // Sound card selection
                         SoundVirtualDev = radioButtonSB16.Checked ? "sb16" :
-                    radioButtonES1371.Checked ? "es1371" :
-                    radioButtonHDAudio.Checked ? "hdaudio" : "hdaudio",
+                            radioButtonES1371.Checked ? "es1371" :
+                            radioButtonHDAudio.Checked ? "hdaudio" : "hdaudio",
 
-                        // Storage controller type
                         StorageControllerType = radioButtonIDE.Checked ? "IDE" :
-                        radioButtonSCSI.Checked ? "SCSI" :
-                        radioButtonNVMe.Checked ? "NVMe" : "SATA",
+                            radioButtonSCSI.Checked ? "SCSI" :
+                            radioButtonNVMe.Checked ? "NVMe" : "SATA",
 
-                        // SCSI specific virtual device type
                         ScsiVirtualDev = radioBusLogic.Checked ? "" :
-                    radioLSILogic.Checked ? "lsilogic" :
-                    radioLSILogicSAS.Checked ? "lsisas1068" : "pvscsi",
+                            radioLSILogic.Checked ? "lsilogic" :
+                            radioLSILogicSAS.Checked ? "lsisas1068" : "pvscsi",
 
-                        // Virtual disk path
                         DiskPath = Path.Combine(vmFolder, vmName + ".vmdk"),
+                        IsoPath = isoFullPath, // Assigned ISO path correctly
 
-                        // Floppy count
                         FloppyCount = (int)numericUpDownFloppyCount.Value,
 
-                        // CD-ROM counts per controller
-                        IdeCdCount = (int)numericUpDownCDIDECount.Value,
-                        ScsiCdCount = (int)numericUpDownCDSCSICount.Value,
-                        SataCdCount = (int)numericUpDownCDSATACount.Value,
+                        IdeCdCount = ideCdCount,
+                        ScsiCdCount = scsiCdCount,
+                        SataCdCount = sataCdCount,
 
-                        // Custom icon path
-                        IconPath = currentIconPath
+                        IconPath = "",
+                        HardwareVersion = hwVersionIni, // Assign the hardware version read from INI
+                        EthernetVirtualDev = iniEthernetDev, // Assign the network adapter type read from INI dynamically
+                        GuestOs = osTypeIni // Assign the OS-Type read from INI dynamically[cite: 1, 3]
                     };
 
-                    // 3. Call the generator to create ONLY the .vmx file (no dummy VMDK)
                     VirtualMachineGenerator.CreateVirtualMachine(vmxFilePath, config);
 
-                    // 3.1 FIXED: Real VMDK creation with correct -t mapping per user spec
-                    // !Allocate + Single = 0 (growable single)
-                    // !Allocate + Split  = 1 (growable split 2GB)
-                    // Allocate + Single  = 2 (preallocated single)
-                    // Allocate + Split   = 3 (preallocated split)
                     try
                     {
                         bool allocate = checkBoxAllocate.Checked;
@@ -272,7 +383,8 @@ namespace VMware_VM_Generator
                                 string err = proc.StandardError.ReadToEnd() + proc.StandardOutput.ReadToEnd();
                                 string lowerErr = err.ToLower();
 
-                                string langFileNameErr = ini.Read("LanguageFile", "General");
+                                string langFileNameErrRaw = ini.Read("LanguageFile", "General");
+                                string langFileNameErr = !string.IsNullOrWhiteSpace(langFileNameErrRaw) ? Environment.ExpandEnvironmentVariables(langFileNameErrRaw) : "";
                                 IniFile langErr = !string.IsNullOrWhiteSpace(langFileNameErr) ? new IniFile(langFileNameErr) : null;
                                 string errTitle = (langErr != null) ? langErr.Read("ErrorTitle", "Language") : "Error";
                                 if (string.IsNullOrWhiteSpace(errTitle)) errTitle = "Error";
@@ -306,7 +418,8 @@ namespace VMware_VM_Generator
                     }
                     catch (Exception exDisk)
                     {
-                        string langFileNameErr2 = ini.Read("LanguageFile", "General");
+                        string langFileNameErr2Raw = ini.Read("LanguageFile", "General");
+                        string langFileNameErr2 = !string.IsNullOrWhiteSpace(langFileNameErr2Raw) ? Environment.ExpandEnvironmentVariables(langFileNameErr2Raw) : "";
                         IniFile langErr2 = !string.IsNullOrWhiteSpace(langFileNameErr2) ? new IniFile(langFileNameErr2) : null;
                         string errTitle2 = (langErr2 != null) ? langErr2.Read("ErrorTitle", "Language") : "Error";
                         if (string.IsNullOrWhiteSpace(errTitle2)) errTitle2 = "Error";
@@ -330,7 +443,6 @@ namespace VMware_VM_Generator
                         return;
                     }
 
-                    // 4. Handle custom icon extraction and copying
                     string targetIconPath = Path.Combine(vmFolder, vmName + ".ico");
                     if (!string.IsNullOrEmpty(currentIconPath) && File.Exists(currentIconPath))
                     {
@@ -340,22 +452,13 @@ namespace VMware_VM_Generator
                         }
                         else
                         {
-                            using (Icon ico = Icon.ExtractAssociatedIcon(currentIconPath))
-                            {
-                                if (ico != null)
-                                {
-                                    using (var fs = new FileStream(targetIconPath, FileMode.Create))
-                                    {
-                                        ico.Save(fs);
-                                    }
-                                }
-                            }
+                            SaveIconWithAllSizes(currentIconPath, currentIconIndex, targetIconPath);
                         }
+                        config.IconPath = targetIconPath;
                     }
 
                     string vmwarePath = GetVmwarePath();
 
-                    // Determine target path and arguments based on user's shortcut type selection
                     string shortcutTarget = vmwarePath;
                     string shortcutArguments = "";
 
@@ -369,7 +472,7 @@ namespace VMware_VM_Generator
                         shortcutTarget = "kvm";
                         shortcutArguments = $"\"{vmxFilePath}\"";
                     }
-                    else // Custom Workstation shortcut
+                    else
                     {
                         shortcutTarget = vmwarePath;
                         if (checkBoxNewWindow.Checked) shortcutArguments += "-n ";
@@ -382,7 +485,6 @@ namespace VMware_VM_Generator
                         shortcutArguments += $"\"{vmxFilePath}\"";
                     }
 
-                    // 5. Create Desktop Shortcut if requested
                     if (checkBoxDesktop.Checked)
                     {
                         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -390,7 +492,6 @@ namespace VMware_VM_Generator
                         CreateShortcut(shortcutPath, vmxFilePath, targetIconPath, shortcutArguments, shortcutTarget);
                     }
 
-                    // 6. Create Start Menu Shortcut if requested
                     if (checkBoxStartMenu.Checked)
                     {
                         string programsPath = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
@@ -405,17 +506,16 @@ namespace VMware_VM_Generator
                         CreateShortcut(shortcutPath, vmxFilePath, targetIconPath, shortcutArguments, shortcutTarget);
                     }
 
-                    // 7. Store base paths for final execution
                     pendingVmxPath = vmxFilePath;
                     pendingVmFolder = vmFolder;
                     pendingVmwarePath = vmwarePath;
 
-                    // 8. Advance to the finish panel (Step 8)
                     ShowStep(8);
                 }
                 catch (Exception ex)
                 {
-                    string langFileName = ini.Read("LanguageFile", "General");
+                    string langFileNameRaw = ini.Read("LanguageFile", "General");
+                    string langFileName = !string.IsNullOrWhiteSpace(langFileNameRaw) ? Environment.ExpandEnvironmentVariables(langFileNameRaw) : "";
                     IniFile lang = !string.IsNullOrWhiteSpace(langFileName) ? new IniFile(langFileName) : null;
 
                     string errTitle = (lang != null) ? lang.Read("ErrorTitle", "Language") : "";
@@ -453,7 +553,6 @@ namespace VMware_VM_Generator
                 }
             };
 
-            // Hook up Finish button event handler to close wizard and execute actions based on live checkbox states
             buttonFinish.Click += (s, e) => {
                 bool shouldOpenFolder = checkBoxOpenFolder.Checked;
                 bool shouldStartVm = checkBoxStartVM.Checked;
@@ -484,19 +583,15 @@ namespace VMware_VM_Generator
                 }
             };
 
-            // Hook up Change Icon button event handler using native Windows PickIconDlg
             buttonChangeIcon.Click += buttonChangeIcon_Click;
-
             btnBrowseFolder.Click += btnBrowseFolder_Click;
 
-            // Wire up text change events for auto-updating VM folder based on VM name and validating inputs
             txtVMName.TextChanged += txtVMName_TextChanged;
             txtVMFolder.TextChanged += txtVMFolder_TextChanged;
 
             bios.CheckedChanged += bios_CheckedChanged;
             uefi.CheckedChanged += uefi_CheckedChanged;
 
-            // Wire up check changed event for shortcut type radio buttons to toggle Workstation specific switches
             EventHandler updateWorkstationSwitches = (s, e) => {
                 bool isWorkstation = radioShortcutWorkstation.Checked;
                 checkBoxNewWindow.Enabled = isWorkstation;
@@ -509,7 +604,6 @@ namespace VMware_VM_Generator
             radioShortcutKvm.CheckedChanged += updateWorkstationSwitches;
             radioShortcutWorkstation.CheckedChanged += updateWorkstationSwitches;
 
-            // Wire up check changed event for short start to toggle full screen availability
             checkBoxShortStart.CheckedChanged += (s, e) => {
                 checkBoxFullScreen.Enabled = radioShortcutWorkstation.Checked && checkBoxShortStart.Checked;
                 if (!checkBoxShortStart.Checked)
@@ -521,7 +615,6 @@ namespace VMware_VM_Generator
             comboNumberOfProcessors.SelectedIndexChanged += (s, e) => UpdateTotalCores();
             comboBoxNumberOfCoresPerProcessor.SelectedIndexChanged += (s, e) => UpdateTotalCores();
 
-            // Also update when user types numbers manually into the combo boxes
             comboNumberOfProcessors.TextChanged += (s, e) => UpdateTotalCores();
             comboBoxNumberOfCoresPerProcessor.TextChanged += (s, e) => UpdateTotalCores();
 
@@ -536,7 +629,6 @@ namespace VMware_VM_Generator
             labelRecommendedDefault.Click += (s, e) => SetMemory(recommendedDefault);
             labelRecommendedMax.Click += (s, e) => SetMemory(recommendedMax);
 
-            // Create suffix labels after layout is complete
             this.Shown += Form1_Shown;
 
             numericUpDownFloppyCount.ValueChanged += numericUpDownFloppyCount_ValueChanged;
@@ -545,7 +637,229 @@ namespace VMware_VM_Generator
             numericUpDownCDSATACount.ValueChanged += numericUpDownCDSATACount_ValueChanged;
         }
 
-        // Helper method to get MessageBox RTL options based on language file Direction=RTL
+        private void SaveIconWithAllSizes(string dllPath, int iconIndex, string targetIcoPath)
+        {
+            IntPtr hModule = LoadLibraryEx(dllPath, IntPtr.Zero, 0x00000002);
+            if (hModule == IntPtr.Zero)
+            {
+                FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                return;
+            }
+
+            try
+            {
+                List<IntPtr> groupIconNames = new List<IntPtr>();
+                EnumResNameProc enumProc = (mod, type, name, param) =>
+                {
+                    groupIconNames.Add(name);
+                    return true;
+                };
+
+                IntPtr RT_GROUP_ICON = (IntPtr)14;
+                EnumResourceNames(hModule, RT_GROUP_ICON, enumProc, IntPtr.Zero);
+
+                if (iconIndex < 0 || iconIndex >= groupIconNames.Count)
+                {
+                    FreeLibrary(hModule);
+                    FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                    return;
+                }
+
+                IntPtr resName = groupIconNames[iconIndex];
+                IntPtr hResInfo = FindResource(hModule, resName, RT_GROUP_ICON);
+                if (hResInfo == IntPtr.Zero)
+                {
+                    FreeLibrary(hModule);
+                    FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                    return;
+                }
+
+                IntPtr hResData = LoadResource(hModule, hResInfo);
+                if (hResData == IntPtr.Zero)
+                {
+                    FreeLibrary(hModule);
+                    FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                    return;
+                }
+
+                IntPtr pResLock = LockResource(hResData);
+                uint groupSize = SizeofResource(hModule, hResInfo);
+                if (pResLock == IntPtr.Zero || groupSize <= 6)
+                {
+                    FreeLibrary(hModule);
+                    FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                    return;
+                }
+
+                byte[] groupBuffer = new byte[groupSize];
+                Marshal.Copy(pResLock, groupBuffer, 0, (int)groupSize);
+
+                ushort idCount = BitConverter.ToUInt16(groupBuffer, 4);
+                var iconEntries = new List<(byte width, byte height, byte colorCount, ushort planes, ushort bitCount, byte[] iconData)>();
+
+                int offset = 6;
+                IntPtr RT_ICON = (IntPtr)3;
+
+                for (int i = 0; i < idCount && offset + 14 <= groupBuffer.Length; i++)
+                {
+                    byte width = groupBuffer[offset];
+                    byte height = groupBuffer[offset + 1];
+                    byte colorCount = groupBuffer[offset + 2];
+                    byte reserved = groupBuffer[offset + 3];
+                    ushort planes = BitConverter.ToUInt16(groupBuffer, offset + 4);
+                    ushort bitCount = BitConverter.ToUInt16(groupBuffer, offset + 6);
+                    uint bytesInRes = BitConverter.ToUInt32(groupBuffer, offset + 8);
+                    ushort nID = BitConverter.ToUInt16(groupBuffer, offset + 12);
+
+                    IntPtr hIconResInfo = FindResource(hModule, (IntPtr)nID, RT_ICON);
+                    if (hIconResInfo != IntPtr.Zero)
+                    {
+                        IntPtr hIconResData = LoadResource(hModule, hIconResInfo);
+                        if (hIconResData != IntPtr.Zero)
+                        {
+                            IntPtr pIconLock = LockResource(hIconResData);
+                            uint iconDataSize = SizeofResource(hModule, hIconResInfo);
+                            if (pIconLock != IntPtr.Zero && iconDataSize > 0)
+                            {
+                                byte[] iconData = new byte[iconDataSize];
+                                Marshal.Copy(pIconLock, iconData, 0, (int)iconDataSize);
+                                iconEntries.Add((width, height, colorCount, planes, bitCount, iconData));
+                            }
+                        }
+                    }
+
+                    offset += 14;
+                }
+
+                FreeLibrary(hModule);
+
+                if (iconEntries.Count == 0)
+                {
+                    FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+                    return;
+                }
+
+                using (FileStream fs = new FileStream(targetIcoPath, FileMode.Create, FileAccess.Write))
+                {
+                    using (BinaryWriter writer = new BinaryWriter(fs))
+                    {
+                        writer.Write((ushort)0);
+                        writer.Write((ushort)1);
+                        writer.Write((ushort)iconEntries.Count);
+
+                        int currentOffset = 6 + (16 * iconEntries.Count);
+
+                        foreach (var entry in iconEntries)
+                        {
+                            writer.Write(entry.width);
+                            writer.Write(entry.height);
+                            writer.Write(entry.colorCount);
+                            writer.Write((byte)0);
+                            writer.Write(entry.planes);
+                            writer.Write(entry.bitCount);
+                            writer.Write((uint)entry.iconData.Length);
+                            writer.Write((uint)currentOffset);
+                            currentOffset += entry.iconData.Length;
+                        }
+
+                        foreach (var entry in iconEntries)
+                        {
+                            writer.Write(entry.iconData);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                try { FreeLibrary(hModule); } catch { }
+                FallbackExtractIcon(dllPath, iconIndex, targetIcoPath);
+            }
+        }
+
+        private void FallbackExtractIcon(string dllPath, int iconIndex, string targetIcoPath)
+        {
+            int[] sizes = new int[] { 16, 20, 24, 32, 40, 48, 64, 72, 80, 96, 128, 256 };
+            var imageInfos = new List<(byte width, byte height, byte[] data)>();
+
+            foreach (int size in sizes)
+            {
+                IntPtr[] phicon = new IntPtr[1];
+                int[] piconid = new int[1];
+                PrivateExtractIcons(dllPath, iconIndex, size, size, phicon, piconid, 1, 0);
+
+                if (phicon[0] != IntPtr.Zero)
+                {
+                    try
+                    {
+                        using (Icon ico = Icon.FromHandle(phicon[0]))
+                        {
+                            using (Bitmap bmp = ico.ToBitmap())
+                            {
+                                using (MemoryStream ms = new MemoryStream())
+                                {
+                                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                                    byte[] pngData = ms.ToArray();
+                                    byte w = (size >= 256) ? (byte)0 : (byte)size;
+                                    byte h = (size >= 256) ? (byte)0 : (byte)size;
+                                    imageInfos.Add((w, h, pngData));
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                    finally
+                    {
+                        DestroyIcon(phicon[0]);
+                    }
+                }
+            }
+
+            if (imageInfos.Count == 0)
+            {
+                using (Icon ico = Icon.ExtractAssociatedIcon(dllPath))
+                {
+                    if (ico != null)
+                    {
+                        using (var fs = new FileStream(targetIcoPath, FileMode.Create))
+                        {
+                            ico.Save(fs);
+                        }
+                    }
+                }
+                return;
+            }
+
+            using (FileStream fs = new FileStream(targetIcoPath, FileMode.Create, FileAccess.Write))
+            {
+                using (BinaryWriter writer = new BinaryWriter(fs))
+                {
+                    writer.Write((ushort)0);
+                    writer.Write((ushort)1);
+                    writer.Write((ushort)imageInfos.Count);
+
+                    int currentOffset = 6 + (16 * imageInfos.Count);
+
+                    foreach (var img in imageInfos)
+                    {
+                        writer.Write(img.width);
+                        writer.Write(img.height);
+                        writer.Write((byte)0);
+                        writer.Write((byte)0);
+                        writer.Write((ushort)1);
+                        writer.Write((ushort)32);
+                        writer.Write((uint)img.data.Length);
+                        writer.Write((uint)currentOffset);
+                        currentOffset += img.data.Length;
+                    }
+
+                    foreach (var img in imageInfos)
+                    {
+                        writer.Write(img.data);
+                    }
+                }
+            }
+        }
+
         private MessageBoxOptions GetRtlOptions(IniFile langFile)
         {
             string dir = langFile != null ? langFile.Read("Direction", "Language") : "";
@@ -553,7 +867,6 @@ namespace VMware_VM_Generator
             return isRtl ? (MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading) : 0;
         }
 
-        // Helper method to retrieve VMware executable installation path from registry or default paths
         private string GetVmwarePath()
         {
             try
@@ -598,8 +911,8 @@ namespace VMware_VM_Generator
 
             string[] candidatePaths = new string[]
             {
-        @"C:\Program Files (x86)\VMware\VMware Workstation\vmware.exe",
-        @"C:\Program Files\VMware\VMware Workstation\vmware.exe"
+                @"C:\Program Files (x86)\VMware\VMware Workstation\vmware.exe",
+                @"C:\Program Files\VMware\VMware Workstation\vmware.exe"
             };
 
             foreach (string path in candidatePaths)
@@ -610,7 +923,6 @@ namespace VMware_VM_Generator
             return @"C:\Program Files (x86)\VMware\VMware Workstation\vmware.exe";
         }
 
-        // Helper method to create a Windows shortcut (.lnk) file using WScript.Shell
         private void CreateShortcut(string shortcutPath, string targetPath, string iconPath, string arguments, string targetExecutable)
         {
             try
@@ -636,37 +948,34 @@ namespace VMware_VM_Generator
             catch { }
         }
 
-        // Event handler for changing virtual machine custom icon via Windows system icon picker
         private void buttonChangeIcon_Click(object sender, EventArgs e)
         {
             string defaultIconPath = Path.Combine(Environment.SystemDirectory, "shell32.dll");
-            int iconIndex = 0;
+            int iconIndex = currentIconIndex;
             StringBuilder sbPath = new StringBuilder(defaultIconPath, 260);
+            if (!string.IsNullOrEmpty(currentIconPath) && File.Exists(currentIconPath))
+                sbPath = new StringBuilder(currentIconPath, 260);
 
             if (PickIconDlg(this.Handle, sbPath, sbPath.Capacity, ref iconIndex))
             {
                 currentIconPath = sbPath.ToString();
-
+                currentIconIndex = iconIndex;
                 try
                 {
-                    IntPtr[] phiconLarge = new IntPtr[1];
-                    IntPtr[] phiconSmall = new IntPtr[1];
-                    ExtractIconEx(currentIconPath, iconIndex, phiconLarge, phiconSmall, 1);
-
-                    if (phiconLarge[0] != IntPtr.Zero)
+                    string tempIcoPath = Path.Combine(Path.GetTempPath(), "vm_gen_temp_preview.ico");
+                    bool isIco = currentIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase);
+                    if (isIco) tempIcoPath = currentIconPath;
+                    else SaveIconWithAllSizes(currentIconPath, currentIconIndex, tempIcoPath);
+                    if (File.Exists(tempIcoPath))
                     {
-                        using (Icon ico = Icon.FromHandle(phiconLarge[0]))
-                        {
-                            pictureVMIcon.Image = ico.ToBitmap();
-                        }
-
-                        if (phiconSmall[0] != IntPtr.Zero)
-                            DestroyIcon(phiconSmall[0]);
+                        SetFormIconSmart(tempIcoPath, isIco ? -1 : currentIconIndex, true);
+                        pictureVMIcon.Image = GetBestPreviewBitmapFromIcoPath(tempIcoPath, 32);
                     }
                 }
                 catch (Exception ex)
                 {
-                    string langFileNameIcon = ini.Read("LanguageFile", "General");
+                    string langFileNameIconRaw = ini.Read("LanguageFile", "General");
+                    string langFileNameIcon = !string.IsNullOrWhiteSpace(langFileNameIconRaw) ? Environment.ExpandEnvironmentVariables(langFileNameIconRaw) : "";
                     IniFile langIcon = !string.IsNullOrWhiteSpace(langFileNameIcon) ? new IniFile(langFileNameIcon) : null;
                     string errTitleIcon = (langIcon != null) ? langIcon.Read("ErrorTitle", "Language") : "Error";
                     if (string.IsNullOrWhiteSpace(errTitleIcon)) errTitleIcon = "Error";
@@ -675,7 +984,195 @@ namespace VMware_VM_Generator
             }
         }
 
-        // Validate user inputs for Step 1 (Name and Directory)
+        private void SetFormIconSmart(string iconPath, int iconIndex, bool pathIsIcoFile)
+        {
+            int captionSize = GetSystemMetrics(SM_CXSMICON);
+            if (captionSize <= 0) captionSize = 16;
+            int dpi = 96;
+            try { uint d = GetDpiForWindow(this.Handle); if (d > 0) dpi = (int)d; } catch { }
+            int taskbarSize = (int)Math.Round(24 * dpi / 96.0);
+            if (taskbarSize <= 0) taskbarSize = 24;
+
+            ReleaseCurrentIconHandles();
+            IntPtr hSmall = IntPtr.Zero;
+            IntPtr hTaskbar = IntPtr.Zero;
+            Bitmap src256 = null;
+            try
+            {
+                if (pathIsIcoFile)
+                {
+                    try { using (var ico = new Icon(iconPath, 256, 256)) src256 = ico.ToBitmap(); } catch { }
+                    if (src256 == null) try { using (var ico = new Icon(iconPath, 128, 128)) src256 = ico.ToBitmap(); } catch { }
+                    if (src256 == null) try { using (var ico = new Icon(iconPath)) src256 = ico.ToBitmap(); } catch { }
+                }
+                else
+                {
+                    IntPtr[] hIcons = new IntPtr[1];
+                    int[] ids = new int[1];
+                    foreach (int sz in new int[] { 256, 128, 64, 48 })
+                    {
+                        int n = PrivateExtractIcons(iconPath, iconIndex, sz, sz, hIcons, ids, 1, 0);
+                        if (n > 0 && hIcons[0] != IntPtr.Zero)
+                        {
+                            try { using (Icon ic = Icon.FromHandle(hIcons[0])) src256 = ic.ToBitmap(); } catch { }
+                            try { DestroyIcon(hIcons[0]); } catch { }
+                            if (src256 != null) break;
+                        }
+                    }
+                }
+            }
+            catch { }
+            if (src256 == null) try { using (var ico = new Icon(iconPath)) src256 = ico.ToBitmap(); } catch { }
+
+            if (src256 != null)
+            {
+                using (Bitmap smallBmp = HighQualityResize(src256, captionSize, captionSize))
+                    hSmall = smallBmp.GetHicon();
+                using (Bitmap taskBmp = HighQualityResize(src256, taskbarSize, taskbarSize))
+                    hTaskbar = taskBmp.GetHicon();
+                src256.Dispose();
+            }
+            else
+            {
+                if (pathIsIcoFile)
+                {
+                    try { using (var ico = new Icon(iconPath, captionSize, captionSize)) hSmall = CopyIconHandle(ico.Handle); } catch { }
+                    try { using (var ico = new Icon(iconPath, taskbarSize, taskbarSize)) hTaskbar = CopyIconHandle(ico.Handle); } catch { }
+                }
+                else
+                {
+                    hSmall = ExtractIconHandle(iconPath, iconIndex, captionSize);
+                    hTaskbar = ExtractIconHandle(iconPath, iconIndex, taskbarSize);
+                }
+            }
+
+            try
+            {
+                var oldIcon = this.Icon;
+                this.Icon = null;
+                oldIcon?.Dispose();
+                this.Icon = new Icon(iconPath);
+            }
+            catch { }
+
+            if (hSmall != IntPtr.Zero)
+            {
+                SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_SMALL, hSmall);
+                currentSmallIconHandle = hSmall;
+            }
+            if (hTaskbar != IntPtr.Zero)
+            {
+                SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_BIG, hTaskbar);
+                currentLargeIconHandle = hTaskbar;
+            }
+        }
+
+        private IntPtr ExtractIconHandle(string path, int index, int size)
+        {
+            IntPtr[] hIcons = new IntPtr[1];
+            int[] ids = new int[1];
+            int n = PrivateExtractIcons(path, index, size, size, hIcons, ids, 1, 0);
+            if (n > 0 && hIcons[0] != IntPtr.Zero) return hIcons[0];
+            return IntPtr.Zero;
+        }
+
+        private IntPtr CopyIconHandle(IntPtr hIcon)
+        {
+            try
+            {
+                using (Icon ico = Icon.FromHandle(hIcon))
+                using (Bitmap bmp = ico.ToBitmap())
+                    return bmp.GetHicon();
+            }
+            catch { return IntPtr.Zero; }
+        }
+
+        private void ReleaseCurrentIconHandles()
+        {
+            try { if (currentSmallIconHandle != IntPtr.Zero) { DestroyIcon(currentSmallIconHandle); currentSmallIconHandle = IntPtr.Zero; } } catch { }
+            try { if (currentLargeIconHandle != IntPtr.Zero) { DestroyIcon(currentLargeIconHandle); currentLargeIconHandle = IntPtr.Zero; } } catch { }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_DPICHANGED)
+            {
+                base.WndProc(ref m);
+                try
+                {
+                    if (!string.IsNullOrEmpty(currentIconPath) && File.Exists(currentIconPath))
+                    {
+                        string icoPath = currentIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase) ? currentIconPath : Path.Combine(Path.GetTempPath(), "vm_gen_temp_preview.ico");
+                        bool isIco = File.Exists(icoPath);
+                        SetFormIconSmart(icoPath, currentIconIndex, isIco);
+                    }
+                }
+                catch { }
+                return;
+            }
+            base.WndProc(ref m);
+        }
+
+        private Bitmap GetBestPreviewBitmapFromIcoPath(string icoPath, int previewSize)
+        {
+            try
+            {
+                foreach (int sz in new int[] { 256, 128, 64, 48, 32 })
+                {
+                    try
+                    {
+                        using (var ico = new Icon(icoPath, sz, sz))
+                        using (var bmpSrc = ico.ToBitmap())
+                        {
+                            if (bmpSrc.Width >= previewSize * 0.8)
+                                return HighQualityResize(bmpSrc, previewSize, previewSize);
+                        }
+                    }
+                    catch { }
+                }
+                using (var ico = new Icon(icoPath))
+                    return new Bitmap(ico.ToBitmap(), new Size(previewSize, previewSize));
+            }
+            catch { return null; }
+        }
+
+        private Bitmap GetBestPreviewBitmap(string dllPath, int iconIndex, int previewSize)
+        {
+            foreach (int sz in new int[] { 256, 128, 64, 48 })
+            {
+                IntPtr[] phicon = new IntPtr[1];
+                int[] piconid = new int[1];
+                int extracted = PrivateExtractIcons(dllPath, iconIndex, sz, sz, phicon, piconid, 1, 0);
+                if (extracted > 0 && phicon[0] != IntPtr.Zero)
+                {
+                    try
+                    {
+                        using (Icon ico = Icon.FromHandle(phicon[0]))
+                        using (Bitmap src = ico.ToBitmap())
+                            return HighQualityResize(src, previewSize, previewSize);
+                    }
+                    catch { }
+                    finally { try { DestroyIcon(phicon[0]); } catch { } }
+                }
+            }
+            try { return Icon.ExtractAssociatedIcon(dllPath)?.ToBitmap(); } catch { return null; }
+        }
+
+        private Bitmap HighQualityResize(Bitmap src, int w, int h)
+        {
+            var dst = new Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(dst))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.Clear(Color.Transparent);
+                g.DrawImage(src, 0, 0, w, h);
+            }
+            return dst;
+        }
+
         private void ValidateStep1()
         {
             bool isNameValid = !string.IsNullOrWhiteSpace(txtVMName.Text);
@@ -703,7 +1200,6 @@ namespace VMware_VM_Generator
             btnStep1Next.Enabled = isNameValid && isFolderValid;
         }
 
-        // Auto-update folder path when virtual machine name changes, unless customized by user
         private void txtVMName_TextChanged(object sender, EventArgs e)
         {
             if (!isUserPathCustomized && !string.IsNullOrWhiteSpace(baseVmDirectory))
@@ -753,7 +1249,6 @@ namespace VMware_VM_Generator
                 numericUpDownCDSATACount.Value = numericUpDownCDSATACount.Minimum;
         }
 
-        // Load wizard icons from the resources directory or output directory and assign them to picture boxes
         private void LoadWizardIcons()
         {
             Image GetResourceImage(string imageName)
@@ -778,12 +1273,10 @@ namespace VMware_VM_Generator
                 return null;
             }
 
-            // Load 32x32 primary icons
             if (iconWelcome != null) iconWelcome.Image = GetResourceImage("iconWelcome");
             if (iconFinish != null) iconFinish.Image = GetResourceImage("iconFinish");
             if (iconFolder != null) iconFolder.Image = GetResourceImage("iconFolder");
             if (iconHardDrive != null) iconHardDrive.Image = GetResourceImage("iconHardDrive");
-            // Ensure icons are above background
             try { pictureBoxStep1Background.SendToBack(); } catch { }
             try { pictureBoxStep4Background.SendToBack(); } catch { }
             try { panelStep1Background.BringToFront(); } catch { }
@@ -791,7 +1284,6 @@ namespace VMware_VM_Generator
             try { iconFolder?.BringToFront(); } catch { }
             try { iconHardDrive?.BringToFront(); } catch { }
 
-            // Load 16x16 secondary icons
             if (iconFirmware != null) iconFirmware.Image = GetResourceImage("iconFirmware");
             if (iconProcessor != null) iconProcessor.Image = GetResourceImage("iconProcessor");
             if (iconMemory != null) iconMemory.Image = GetResourceImage("iconMemory");
@@ -806,7 +1298,6 @@ namespace VMware_VM_Generator
                 iconFloppy.BackColor = Color.Transparent;
             }
 
-            // Use the shared iconCD.png image for all CD/DVD controller icons
             Image cdIcon = GetResourceImage("iconCD");
             PictureBox[] cdPictureBoxes = new PictureBox[] { iconCDIDE, iconCDSCSI, iconCDSATA };
             foreach (var cdPic in cdPictureBoxes)
@@ -826,10 +1317,10 @@ namespace VMware_VM_Generator
 
             trackBarMemory.RightToLeft = RightToLeft.No;
 
-            // Load wizard icons from Resources folder or output directory
             LoadWizardIcons();
 
-            string langFileName = ini.Read("LanguageFile", "General");
+            string langFileNameRaw = ini.Read("LanguageFile", "General");
+            string langFileName = !string.IsNullOrWhiteSpace(langFileNameRaw) ? Environment.ExpandEnvironmentVariables(langFileNameRaw) : "";
             IniFile lang = null;
 
             if (!string.IsNullOrWhiteSpace(langFileName))
@@ -850,25 +1341,56 @@ namespace VMware_VM_Generator
 
             string osName = ini.Read("OS-Name", "General");
             string vmName = ini.Read("VM-Name", "General");
-            string vmFolder = ini.Read("VM-Folder", "General");
 
-            string iniIcon = ini.Read("Icon", "General");
+            string vmFolderRaw = ini.Read("VM-Folder", "General");
+            string vmFolder = !string.IsNullOrWhiteSpace(vmFolderRaw) ? Environment.ExpandEnvironmentVariables(vmFolderRaw) : "";
+
+            string iniIconRaw = ini.Read("Icon", "General");
+            string iniIcon = !string.IsNullOrWhiteSpace(iniIconRaw) ? Environment.ExpandEnvironmentVariables(iniIconRaw) : "";
+
             if (string.IsNullOrWhiteSpace(iniIcon))
             {
                 currentIconPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             }
             else
             {
-                currentIconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, iniIcon);
+                if (Path.IsPathRooted(iniIcon))
+                {
+                    currentIconPath = iniIcon;
+                }
+                else
+                {
+                    currentIconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, iniIcon);
+                }
             }
 
+            // Load multi-resolution icon - FIXED dynamic per actual size
             try
             {
                 if (File.Exists(currentIconPath))
                 {
-                    using (Icon ico = Icon.ExtractAssociatedIcon(currentIconPath))
+                    try { var oi = this.Icon; this.Icon = null; oi?.Dispose(); } catch { }
+                    ReleaseCurrentIconHandles();
+
+                    if (currentIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (ico != null) pictureVMIcon.Image = ico.ToBitmap();
+                        SetFormIconSmart(currentIconPath, -1, true);
+                        pictureVMIcon.Image = GetBestPreviewBitmapFromIcoPath(currentIconPath, 32);
+                    }
+                    else
+                    {
+                        string tempFormIco = Path.Combine(Path.GetTempPath(), "vm_gen_form_init.ico");
+                        SaveIconWithAllSizes(currentIconPath, currentIconIndex, tempFormIco);
+                        if (File.Exists(tempFormIco))
+                        {
+                            SetFormIconSmart(tempFormIco, -1, true);
+                            pictureVMIcon.Image = GetBestPreviewBitmapFromIcoPath(tempFormIco, 32);
+                        }
+                        else
+                        {
+                            SetFormIconSmart(currentIconPath, currentIconIndex, false);
+                            pictureVMIcon.Image = GetBestPreviewBitmap(currentIconPath, currentIconIndex, 32);
+                        }
                     }
                 }
             }
@@ -900,16 +1422,16 @@ namespace VMware_VM_Generator
             labelFinishTitle.Text = $"Completing the VMware VM Generator wizard of {osName}.";
             labelFinishText.Text = $"You have successfully completed the VMware VM Generator wizard for {osName}.";
 
-            this.Text = $"VMware {osName} VM Generator";
+            SetFormTitle($"VMware {osName} VM Generator");
 
             comboNumberOfProcessors.Items.AddRange(new object[]
             {
-        1, 2, 4, 8, 16, 32
+                1, 2, 4, 8, 16, 32
             });
 
             comboBoxNumberOfCoresPerProcessor.Items.AddRange(new object[]
             {
-        1, 2, 3, 4, 6, 8, 12, 16, 24, 32
+                1, 2, 3, 4, 6, 8, 12, 16, 24, 32
             });
 
             comboNumberOfProcessors.SelectedIndex = 0;
@@ -1054,25 +1576,25 @@ namespace VMware_VM_Generator
             radioParavirtualizedSCSI.Enabled = true;
 
             if (!string.IsNullOrWhiteSpace(busLogicEnabled) &&
-              (busLogicEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || busLogicEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
+                (busLogicEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || busLogicEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
             {
                 radioBusLogic.Enabled = false;
             }
 
             if (!string.IsNullOrWhiteSpace(lsiLogicEnabled) &&
-              (lsiLogicEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || lsiLogicEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
+                (lsiLogicEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || lsiLogicEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
             {
                 radioLSILogic.Enabled = false;
             }
 
             if (!string.IsNullOrWhiteSpace(lsiLogicSASEnabled) &&
-              (lsiLogicSASEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || lsiLogicSASEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
+                (lsiLogicSASEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || lsiLogicSASEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
             {
                 radioLSILogicSAS.Enabled = false;
             }
 
             if (!string.IsNullOrWhiteSpace(paravirtualizedEnabled) &&
-              (paravirtualizedEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || paravirtualizedEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
+                (paravirtualizedEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) || paravirtualizedEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase)))
             {
                 radioParavirtualizedSCSI.Enabled = false;
             }
@@ -1221,7 +1743,7 @@ namespace VMware_VM_Generator
             }
             else if (bootController == "SATA")
             {
-                if (scsiCount == 0) sataCount = 1;
+                if (sataCount == 0) sataCount = 1;
                 numericUpDownCDSATACount.Minimum = 1;
             }
 
@@ -1253,13 +1775,11 @@ namespace VMware_VM_Generator
                 SetDefaultRecommendedTag();
             }
 
-            // Read and apply custom UI settings (Color and Font Name) safely from settings.ini
             ApplyCustomUIsettings();
 
             ValidateStep1();
         }
 
-        // Read and apply custom text color and font name safely from settings.ini [UI] section while preserving original control sizes and styles and enforcing color exemptions for controls
         private void ApplyCustomUIsettings()
         {
             try
@@ -1275,20 +1795,15 @@ namespace VMware_VM_Generator
 
                 ApplyUIStyleToControls(this, customTextColor, fontName);
             }
-            catch
-            {
-                // Fallback if parsing fails
-            }
+            catch { }
         }
 
-        // Helper method to recursively apply text color and font name while keeping original size and style, and exempting buttons, input fields, and memory labels
         private void ApplyUIStyleToControls(Control container, Color? color, string fontName)
         {
             foreach (Control ctrl in container.Controls)
             {
                 if (ctrl is Button || ctrl is CustomButton || ctrl is TextBox || ctrl is ComboBox || ctrl is NumericUpDown)
                 {
-                    // Buttons, TextBoxes, ComboBoxes, and NumericUpDowns must always have black text
                     ctrl.ForeColor = Color.Black;
                 }
                 else if (ctrl == labelRecommendedMin)
@@ -1310,7 +1825,6 @@ namespace VMware_VM_Generator
 
                 if (!string.IsNullOrWhiteSpace(fontName))
                 {
-                    // Preserve each control's original size and style (like Bold for titles)
                     ctrl.Font = new Font(fontName, ctrl.Font.Size, ctrl.Font.Style);
                 }
 
@@ -1347,8 +1861,6 @@ namespace VMware_VM_Generator
             return $"{mb / 1024} GB";
         }
 
-        // Loads a PNG with preserved alpha channel into a control
-        // Uses 32bpp ARGB to keep transparency
         private void LoadBackground(Control control, string imageName)
         {
             if (control == null) return;
@@ -1402,8 +1914,6 @@ namespace VMware_VM_Generator
             }
         }
 
-        // Loads all wizard frame images for a step and fixes transparency
-        // The key: TopRight must be child of panelTop for real alpha blending and on top
         private void LoadPageLayout(string pagePrefix)
         {
             LoadBackground(this.Controls.Find($"panel{pagePrefix}Background", true).FirstOrDefault(), "WizardBackground");
@@ -1434,7 +1944,6 @@ namespace VMware_VM_Generator
                     {
                         picTopRight.Parent = panelTop;
                     }
-                    // RTL fix: if interface is RTL, move image to left side
                     bool isRtl = this.RightToLeft == RightToLeft.Yes;
                     if (isRtl)
                         picTopRight.Location = new Point(0, 0);
@@ -1576,7 +2085,6 @@ namespace VMware_VM_Generator
 
                 MakeControlsTransparent(activePanel);
 
-                // Force TopRight to stay visible and on top for every step
                 try
                 {
                     var trPic = this.Controls.Find($"pictureBox{pagePrefix}TopRight", true).FirstOrDefault() as PictureBox;
@@ -1869,7 +2377,11 @@ namespace VMware_VM_Generator
             {
                 string vmNameForTitle = "";
                 try { vmNameForTitle = txtVMName != null ? txtVMName.Text.Trim() : ""; } catch { }
-                this.Text = customTitleTemplate.Replace("{osName}", osName).Replace("{vmName}", vmNameForTitle);
+                SetFormTitle(customTitleTemplate.Replace("{osName}", osName).Replace("{vmName}", vmNameForTitle));
+            }
+            else
+            {
+                SetFormTitle($"VMware {osName} VM Generator");
             }
 
             string customNotSupported = lang.Read("NotSupportedText", "Language");
@@ -1946,8 +2458,6 @@ namespace VMware_VM_Generator
             bool rtl = direction.Equals("RTL", StringComparison.OrdinalIgnoreCase);
 
             this.RightToLeft = rtl ? RightToLeft.Yes : RightToLeft.No;
-            // Critical fix: RightToLeftLayout automatically mirrors the entire Form and conflicts with LoadPageLayout
-            // We disable it and handle positioning manually in LoadPageLayout
             this.RightToLeftLayout = false;
 
             foreach (Control ctrl in this.Controls)
@@ -1955,8 +2465,6 @@ namespace VMware_VM_Generator
 
             if (rtl) MirrorControls(this);
 
-            // Fix: refresh WizardTopRight position for current screen immediately after direction change
-            // Otherwise welcome screen stays on right until Next is clicked
             try
             {
                 string currentPrefix = "Welcome";
@@ -1973,6 +2481,16 @@ namespace VMware_VM_Generator
                 LoadPageLayout(currentPrefix);
             }
             catch { }
+
+            try
+            {
+                SetFormTitle(this.Text);
+                if (this.IsHandleCreated)
+                {
+                    this.RecreateHandle();
+                }
+            }
+            catch { }
         }
 
         private void MirrorControls(Control container)
@@ -1981,7 +2499,6 @@ namespace VMware_VM_Generator
             foreach (Control ctrl in container.Controls.Cast<Control>().ToArray())
             {
                 if (ctrl == trackBarMemory) continue;
-                // RTL fix: skip WizardTopRight images - they are handled in LoadPageLayout
                 if (ctrl is PictureBox pb && pb.Name.EndsWith("TopRight")) continue;
                 int newX = width - ctrl.Left - ctrl.Width;
                 ctrl.Left = newX;
@@ -2249,7 +2766,8 @@ namespace VMware_VM_Generator
             string vmName = txtVMName.Text;
             string vmFolder = txtVMFolder.Text;
 
-            string langFileName = ini.Read("LanguageFile", "General");
+            string langFileNameRaw = ini.Read("LanguageFile", "General");
+            string langFileName = !string.IsNullOrWhiteSpace(langFileNameRaw) ? Environment.ExpandEnvironmentVariables(langFileNameRaw) : "";
             IniFile lang = !string.IsNullOrWhiteSpace(langFileName) ? new IniFile(langFileName) : null;
 
             string GetTr(string key, string defaultText)
@@ -2266,14 +2784,12 @@ namespace VMware_VM_Generator
             string titleTemplate = GetTr("SummaryTitleTemplate", "Summary of {vmName} virtual machine configuration:");
             string titleWithVm = titleTemplate.Replace("{vmName}", vmName).Replace("{osName}", osName);
 
-            // labelSummaryTitle should show Ready text, not SummaryTitleTemplate
             string readyTitle = GetTr("labelSummaryTitle", "Ready to create virtual machine");
             if (!string.IsNullOrWhiteSpace(readyTitle))
                 labelSummaryTitle.Text = readyTitle.Replace("{vmName}", vmName).Replace("{osName}", osName);
             else
                 labelSummaryTitle.Text = titleWithVm;
 
-            // Fix the label that displays SummaryTitleTemplate (the one above txtSummary)
             try
             {
                 var summaryTemplateCtrl = this.Controls.Find("SummaryTitleTemplate", true).FirstOrDefault();
