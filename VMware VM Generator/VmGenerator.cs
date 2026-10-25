@@ -212,6 +212,7 @@ namespace VMware_VM_Generator
                 else
                 {
                     sb.AppendLine($"{ideKey}.deviceType = \"cdrom-image\"");
+                    sb.AppendLine($"{ideKey}.startConnected = \"FALSE\"");
                 }
                 ideAssignedCount++;
             }
@@ -239,6 +240,7 @@ namespace VMware_VM_Generator
                 else
                 {
                     sb.AppendLine($"{scsiKey}.deviceType = \"cdrom-image\"");
+                    sb.AppendLine($"{scsiKey}.startConnected = \"FALSE\"");
                 }
                 scsiAssignedCount++;
             }
@@ -278,6 +280,7 @@ namespace VMware_VM_Generator
                     else
                     {
                         sb.AppendLine($"{sataKey}.deviceType = \"cdrom-image\"");
+                        sb.AppendLine($"{sataKey}.startConnected = \"FALSE\"");
                     }
                     sataAssignedCount++;
                 }
