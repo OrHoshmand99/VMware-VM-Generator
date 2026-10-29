@@ -2053,7 +2053,7 @@ namespace VMware_VM_Generator
             checkBoxStartMenu.AutoSize = true;
             checkBoxStartMenu.Checked = true;
             checkBoxStartMenu.CheckState = CheckState.Checked;
-            checkBoxStartMenu.Location = new Point(371, 305);
+            checkBoxStartMenu.Location = new Point(371, 422);
             checkBoxStartMenu.Name = "checkBoxStartMenu";
             checkBoxStartMenu.Size = new Size(155, 19);
             checkBoxStartMenu.TabIndex = 10;
@@ -2063,7 +2063,7 @@ namespace VMware_VM_Generator
             // checkBoxFullScreen
             // 
             checkBoxFullScreen.AutoSize = true;
-            checkBoxFullScreen.Location = new Point(222, 393);
+            checkBoxFullScreen.Location = new Point(222, 349);
             checkBoxFullScreen.Name = "checkBoxFullScreen";
             checkBoxFullScreen.Size = new Size(82, 19);
             checkBoxFullScreen.TabIndex = 10;
@@ -2073,7 +2073,7 @@ namespace VMware_VM_Generator
             // checkBoxClose
             // 
             checkBoxClose.AutoSize = true;
-            checkBoxClose.Location = new Point(202, 418);
+            checkBoxClose.Location = new Point(202, 374);
             checkBoxClose.Name = "checkBoxClose";
             checkBoxClose.Size = new Size(211, 19);
             checkBoxClose.TabIndex = 10;
@@ -2085,7 +2085,7 @@ namespace VMware_VM_Generator
             checkBoxShortStart.AutoSize = true;
             checkBoxShortStart.Checked = true;
             checkBoxShortStart.CheckState = CheckState.Checked;
-            checkBoxShortStart.Location = new Point(202, 370);
+            checkBoxShortStart.Location = new Point(202, 326);
             checkBoxShortStart.Name = "checkBoxShortStart";
             checkBoxShortStart.Size = new Size(230, 19);
             checkBoxShortStart.TabIndex = 10;
@@ -2097,7 +2097,7 @@ namespace VMware_VM_Generator
             checkBoxNewWindow.AutoSize = true;
             checkBoxNewWindow.Checked = true;
             checkBoxNewWindow.CheckState = CheckState.Checked;
-            checkBoxNewWindow.Location = new Point(202, 345);
+            checkBoxNewWindow.Location = new Point(202, 301);
             checkBoxNewWindow.Name = "checkBoxNewWindow";
             checkBoxNewWindow.Size = new Size(185, 19);
             checkBoxNewWindow.TabIndex = 10;
@@ -2109,7 +2109,7 @@ namespace VMware_VM_Generator
             checkBoxDesktop.AutoSize = true;
             checkBoxDesktop.Checked = true;
             checkBoxDesktop.CheckState = CheckState.Checked;
-            checkBoxDesktop.Location = new Point(170, 305);
+            checkBoxDesktop.Location = new Point(170, 422);
             checkBoxDesktop.Name = "checkBoxDesktop";
             checkBoxDesktop.Size = new Size(140, 19);
             checkBoxDesktop.TabIndex = 10;
