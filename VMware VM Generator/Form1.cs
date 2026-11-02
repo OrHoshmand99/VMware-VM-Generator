@@ -203,6 +203,10 @@ namespace VMware_VM_Generator
             btnStep2Next.Click += btnStep2Next_Click;
             btnStep2Cancel.Click += btnStep2Cancel_Click;
 
+            // Restrict processor and core input fields to numeric characters only
+            comboNumberOfProcessors.KeyPress += NumberOnly_KeyPress;
+            comboBoxNumberOfCoresPerProcessor.KeyPress += NumberOnly_KeyPress;
+
             // Step 3 buttons
             btnStep3Back.Click += (s, e) => ShowStep(2);
             btnStep3Next.Click += (s, e) => ShowStep(4);
@@ -256,7 +260,7 @@ namespace VMware_VM_Generator
                     string osTypeIni = ini.Read("OS-Type", "General");
                     if (string.IsNullOrWhiteSpace(osTypeIni)) osTypeIni = "other-64";
 
-                    // Read ISO file path from [BootCD] section in settings.ini[cite: 1, 3]
+                    // Read ISO file path from [BootCD] section in settings.ini
                     string isoFileName = ini.Read("OS-ISO", "BootCD");
                     string isoFullPath = "";
                     if (!string.IsNullOrWhiteSpace(isoFileName))
@@ -300,7 +304,7 @@ namespace VMware_VM_Generator
                     {
                         VmName = vmName,
                         MemoryMb = (int)numericUpDownMemory.Value,
-                        NumVcpus = processors, // UI socket count; VmGenerator calculates total vCPUs as Sockets * CoresPerSocket
+                        NumVcpus = processors,
                         CoresPerSocket = coresPerProcessor,
 
                         Firmware = uefi.Checked ? "efi" : "bios",
@@ -319,7 +323,7 @@ namespace VMware_VM_Generator
                             radioLSILogicSAS.Checked ? "lsisas1068" : "pvscsi",
 
                         DiskPath = Path.Combine(vmFolder, vmName + ".vmdk"),
-                        IsoPath = isoFullPath, // Assigned ISO path correctly
+                        IsoPath = isoFullPath,
 
                         FloppyCount = (int)numericUpDownFloppyCount.Value,
 
@@ -328,9 +332,9 @@ namespace VMware_VM_Generator
                         SataCdCount = sataCdCount,
 
                         IconPath = "",
-                        HardwareVersion = hwVersionIni, // Assign the hardware version read from INI
-                        EthernetVirtualDev = iniEthernetDev, // Assign the network adapter type read from INI dynamically
-                        GuestOs = osTypeIni // Assign the OS-Type read from INI dynamically[cite: 1, 3]
+                        HardwareVersion = hwVersionIni,
+                        EthernetVirtualDev = iniEthernetDev,
+                        GuestOs = osTypeIni
                     };
 
                     VirtualMachineGenerator.CreateVirtualMachine(vmxFilePath, config);
@@ -406,8 +410,7 @@ namespace VMware_VM_Generator
                                 {
                                     string template = (langErr != null) ? langErr.Read("ErrorVDiskManagerFailed", "Language") : "";
                                     if (string.IsNullOrWhiteSpace(template)) template = "vdiskmanager failed with exit code {0}: {1}";
-                                    try { translatedError = string.Format(template, proc.ExitCode, err); }
-                                    catch { translatedError = template + $" {proc.ExitCode}: {err}"; }
+                                    translatedError = string.Format(template, proc.ExitCode, err);
                                 }
 
                                 string finalMsg = errTemplate.Replace("{error}", translatedError);
@@ -542,6 +545,10 @@ namespace VMware_VM_Generator
                     if (string.IsNullOrWhiteSpace(errTemplate)) errTemplate = "Failed to create virtual machine file:\n{error}";
 
                     string finalMessage = errTemplate.Replace("{error}", errorMessage);
+                    if (!finalMessage.Contains(ex.Message))
+                    {
+                        finalMessage = errTemplate.Replace("{error}", ex.Message);
+                    }
 
                     MessageBoxOptions options = 0;
                     if (isRtl)
@@ -635,6 +642,15 @@ namespace VMware_VM_Generator
             numericUpDownCDIDECount.ValueChanged += numericUpDownCDIDECount_ValueChanged;
             numericUpDownCDSCSICount.ValueChanged += numericUpDownCDSCSICount_ValueChanged;
             numericUpDownCDSATACount.ValueChanged += numericUpDownCDSATACount_ValueChanged;
+        }
+
+        // Restricts combobox keypress input to control keys and digits only
+        private void NumberOnly_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
 
         private void SaveIconWithAllSizes(string dllPath, int iconIndex, string targetIcoPath)
@@ -979,7 +995,9 @@ namespace VMware_VM_Generator
                     IniFile langIcon = !string.IsNullOrWhiteSpace(langFileNameIcon) ? new IniFile(langFileNameIcon) : null;
                     string errTitleIcon = (langIcon != null) ? langIcon.Read("ErrorTitle", "Language") : "Error";
                     if (string.IsNullOrWhiteSpace(errTitleIcon)) errTitleIcon = "Error";
-                    MessageBox.Show("Could not load icon from selected file: " + ex.Message, errTitleIcon, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, GetRtlOptions(langIcon));
+                    string iconErrTemplate = (langIcon != null) ? langIcon.Read("ErrorLoadIcon", "Language") : "";
+                    if (string.IsNullOrWhiteSpace(iconErrTemplate)) iconErrTemplate = "Could not load icon from selected file:\n{error}";
+                    MessageBox.Show(iconErrTemplate.Replace("{error}", ex.Message), errTitleIcon, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, GetRtlOptions(langIcon));
                 }
             }
         }
@@ -1364,7 +1382,6 @@ namespace VMware_VM_Generator
                 }
             }
 
-            // Load multi-resolution icon - FIXED dynamic per actual size
             try
             {
                 if (File.Exists(currentIconPath))
@@ -1680,7 +1697,7 @@ namespace VMware_VM_Generator
 
             if (driveDefault == "ide" && radioButtonIDE.Enabled)
                 radioButtonIDE.Checked = true;
-            else if (driveDefault == "scsi" && radioButtonSCSI.Checked)
+            else if (driveDefault == "scsi" && radioButtonSCSI.Enabled)
                 radioButtonSCSI.Checked = true;
             else if (driveDefault == "nvme" && radioButtonNVMe.Enabled)
                 radioButtonNVMe.Checked = true;
@@ -1691,7 +1708,16 @@ namespace VMware_VM_Generator
             int capacity = int.TryParse(cap, out int capValue) ? capValue : 64;
             numericUpDownDriveCapacity.Value = capacity;
 
-            labelRecommendedDriveCapacity.Text = $"Recommended capacity for {osName}: {capacity} GB";
+            string customCapStr = ini.Read("CustomCapacity", "Virtual Drive");
+            int customCap = int.TryParse(customCapStr, out int customCapVal) ? customCapVal : 0;
+
+            string capTemplate = lang != null ? lang.Read("labelRecommendedDriveCapacity", "Language") : null;
+            if (string.IsNullOrWhiteSpace(capTemplate))
+                capTemplate = "Recommended capacity for {osName}: {capacity} GB";
+            labelRecommendedDriveCapacity.Text = capTemplate
+                .Replace("{capacity}", (customCap > 0 ? customCap : capacity).ToString())
+                .Replace("{osName}", osName);
+            numericUpDownDriveCapacity.Value = customCap > 0 ? customCap : capacity;
 
             string fmt = ini.Read("DefaultFormat", "Virtual Drive").ToLower();
             if (fmt == "single")
@@ -2148,9 +2174,14 @@ namespace VMware_VM_Generator
 
         private void btnBrowseFolder_Click(object sender, EventArgs e)
         {
+            string langFileNameRaw = ini.Read("LanguageFile", "General");
+            string langFileName = !string.IsNullOrWhiteSpace(langFileNameRaw) ? Environment.ExpandEnvironmentVariables(langFileNameRaw) : "";
+            IniFile lang = !string.IsNullOrWhiteSpace(langFileName) ? new IniFile(langFileName) : null;
+
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "Select a folder to save the virtual machine";
+                string dialogDesc = (lang != null) ? lang.Read("FolderBrowserDescription", "Language") : "";
+                dialog.Description = string.IsNullOrWhiteSpace(dialogDesc) ? "Select a folder to save the virtual machine" : dialogDesc;
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     isUpdatingProgrammatically = true;
