@@ -105,7 +105,7 @@ namespace VMware_VM_Generator
             sb.AppendLine("ehci.present = \"TRUE\"");
             sb.AppendLine("usb_xhci.present = \"TRUE\"");
 
-            // 4. Conditional network adapter type injection
+            // 4. Conditional network adapter type injection (כרטיס הרשת שנבחר)
             if (!string.IsNullOrWhiteSpace(config.EthernetVirtualDev))
             {
                 sb.AppendLine($"ethernet0.virtualDev = \"{config.EthernetVirtualDev.Trim()}\"");
@@ -124,7 +124,9 @@ namespace VMware_VM_Generator
             sb.AppendLine($"memsize = \"{config.MemoryMb}\"");
             sb.AppendLine($"scsi0.virtualDev = \"{(string.IsNullOrEmpty(config.ScsiVirtualDev) ? "lsilogic" : config.ScsiVirtualDev)}\"");
             sb.AppendLine($"sound.virtualDev = \"{config.SoundVirtualDev}\"");
-            sb.AppendLine($"ethernet0.connectionType = \"{config.NetworkType}\"");
+
+            // תמיד חיבור NAT עבור הרשת בהתאם לדרישה
+            sb.AppendLine("ethernet0.connectionType = \"nat\"");
 
             // 6. Primary Storage Controller and Disk configuration
             string primaryController = config.StorageControllerType.ToLower();
@@ -333,7 +335,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$CurrentDir = $PSScriptRoot");
                 ps.AppendLine("if (-not $CurrentDir) { $CurrentDir = Split-Path -Parent $MyInvocation.MyCommand.Definition }");
 
-                // Flexible VMX search: check current folder, then parent folder, or prompt user via OpenFileDialog if not found
                 ps.AppendLine("$VmxFile = Get-ChildItem -Path $CurrentDir -Filter \"*.vmx\" | Select-Object -First 1");
                 ps.AppendLine("if (-not $VmxFile) {");
                 ps.AppendLine("    $ParentDir = Split-Path -Parent $CurrentDir");
@@ -356,7 +357,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$DefaultName = $VmxFile.BaseName");
                 ps.AppendLine("$VmxPath = $VmxFile.FullName");
 
-                // Build compact WinForms dialog matching Wizard Step 6
                 ps.AppendLine("$form = New-Object System.Windows.Forms.Form");
                 ps.AppendLine("$form.Text = \"Create Virtual Machine Shortcuts\"");
                 ps.AppendLine("$form.Size = New-Object System.Drawing.Size(460, 415)");
@@ -365,7 +365,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$form.MinimizeBox = $false");
                 ps.AppendLine("$form.StartPosition = 'CenterScreen'");
 
-                // Shortcut Name Label & TextBox
                 ps.AppendLine("$lbl = New-Object System.Windows.Forms.Label");
                 ps.AppendLine("$lbl.Text = \"Shortcut name:\"");
                 ps.AppendLine("$lbl.Location = New-Object System.Drawing.Point(20, 20)");
@@ -378,7 +377,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$txt.Text = $DefaultName");
                 ps.AppendLine("$form.Controls.Add($txt)");
 
-                // GroupBox for Shortcut Type
                 ps.AppendLine("$gb = New-Object System.Windows.Forms.GroupBox");
                 ps.AppendLine("$gb.Text = \"Shortcut Type\"");
                 ps.AppendLine("$gb.Location = New-Object System.Drawing.Point(20, 55)");
@@ -404,7 +402,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$rbWs.Checked = $true");
                 ps.AppendLine("$gb.Controls.Add($rbWs)");
 
-                // Advanced Workstation Checkboxes
                 ps.AppendLine("$chkNewWin = New-Object System.Windows.Forms.CheckBox");
                 ps.AppendLine("$chkNewWin.Text = \"Always open in a new window\"");
                 ps.AppendLine("$chkNewWin.Location = New-Object System.Drawing.Point(35, 160)");
@@ -431,7 +428,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$chkClose.AutoSize = $true");
                 ps.AppendLine("$form.Controls.Add($chkClose)");
 
-                // Location Checkboxes (Desktop & Start Menu)
                 ps.AppendLine("$chkDesk = New-Object System.Windows.Forms.CheckBox");
                 ps.AppendLine("$chkDesk.Text = \"Add desktop shortcut\"");
                 ps.AppendLine("$chkDesk.Location = New-Object System.Drawing.Point(20, 270)");
@@ -446,7 +442,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$chkStartMenu.Checked = $true");
                 ps.AppendLine("$form.Controls.Add($chkStartMenu)");
 
-                // Enable/Disable logic for Workstation options
                 ps.AppendLine("$updateWs = {");
                 ps.AppendLine("    $isWs = $rbWs.Checked");
                 ps.AppendLine("    $chkNewWin.Enabled = $isWs");
@@ -459,7 +454,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$rbWs.Add_CheckedChanged($updateWs)");
                 ps.AppendLine("$chkStart.Add_CheckedChanged({ $chkFull.Enabled = $rbWs.Checked -and $chkStart.Checked; if (-not $chkStart.Checked) { $chkFull.Checked = $false } })");
 
-                // Buttons
                 ps.AppendLine("$btnCreate = New-Object System.Windows.Forms.Button");
                 ps.AppendLine("$btnCreate.Text = \"Create\"");
                 ps.AppendLine("$btnCreate.Location = New-Object System.Drawing.Point(254, 330)");
@@ -475,7 +469,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("$form.CancelButton = $btnCancel");
                 ps.AppendLine("$form.Controls.Add($btnCancel)");
 
-                // Auto-detect VMware path function
                 ps.AppendLine("function Get-VMwarePath {");
                 ps.AppendLine("    try {");
                 ps.AppendLine("        $key = Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\VMware, Inc.\\VMware Workstation' -ErrorAction Stop");
@@ -490,7 +483,6 @@ namespace VMware_VM_Generator
                 ps.AppendLine("    return \"C:\\Program Files (x86)\\VMware\\VMware Workstation\\vmware.exe\"");
                 ps.AppendLine("}");
 
-                // Create Button Click Action
                 ps.AppendLine("$btnCreate.Add_Click({");
                 ps.AppendLine("    $name = $txt.Text.Trim()");
                 ps.AppendLine("    if (-not $name) { $name = $DefaultName }");
