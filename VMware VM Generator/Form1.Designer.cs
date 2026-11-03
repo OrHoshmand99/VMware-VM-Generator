@@ -25,9 +25,10 @@ namespace VMware_VM_Generator
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             toolTip1 = new ToolTip(components);
-            radioButtonBridged = new RadioButton();
-            radioButtonNAT = new RadioButton();
-            radioButtonHostOnly = new RadioButton();
+            this.radioButtonE1000PCI = new RadioButton();
+            this.radioButtonE1000PCIe = new RadioButton();
+            radioButtonPCNet32 = new RadioButton();
+            this.radioButtonVMXNET3 = new RadioButton();
             numericUpDownFloppyCount = new NumericUpDown();
             numericUpDownCDIDECount = new NumericUpDown();
             numericUpDownCDSCSICount = new NumericUpDown();
@@ -120,7 +121,6 @@ namespace VMware_VM_Generator
             radioLSILogic = new RadioButton();
             radioBusLogic = new RadioButton();
             groupBoxNetwork = new GroupBox();
-            radioButtonNoNetwork = new RadioButton();
             btnStep3Back = new CustomButton();
             btnStep3Next = new CustomButton();
             btnStep3Cancel = new CustomButton();
@@ -244,6 +244,7 @@ namespace VMware_VM_Generator
             panelFinishBottom = new Panel();
             panelFinishBackground = new Panel();
             iconFinish = new PictureBox();
+
             ((System.ComponentModel.ISupportInitialize)numericUpDownFloppyCount).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownCDIDECount).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownCDSCSICount).BeginInit();
@@ -328,39 +329,51 @@ namespace VMware_VM_Generator
             panelFinishBackground.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconFinish).BeginInit();
             SuspendLayout();
+
             // 
-            // radioButtonBridged
+            // radioButtonE1000PCI
             // 
-            radioButtonBridged.Location = new Point(15, 25);
-            radioButtonBridged.Name = "radioButtonBridged";
-            radioButtonBridged.Size = new Size(150, 24);
-            radioButtonBridged.TabIndex = 0;
-            radioButtonBridged.TabStop = true;
-            radioButtonBridged.Text = "Use bridge networking";
-            toolTip1.SetToolTip(radioButtonBridged, "Give the guest operating system direct access to an external Ethernet network.");
-            radioButtonBridged.UseVisualStyleBackColor = false;
+            this.radioButtonE1000PCI.Location = new Point(15, 25);
+            this.radioButtonE1000PCI.Name = "radioButtonE1000PCI";
+            this.radioButtonE1000PCI.Size = new Size(129, 24);
+            this.radioButtonE1000PCI.TabIndex = 0;
+            this.radioButtonE1000PCI.TabStop = true;
+            this.radioButtonE1000PCI.Text = "Intel PRO/1000 PCI";
+            this.radioButtonE1000PCI.UseVisualStyleBackColor = false;
+
             // 
-            // radioButtonNAT
+            // radioButtonE1000PCIe
             // 
-            radioButtonNAT.Location = new Point(247, 25);
-            radioButtonNAT.Name = "radioButtonNAT";
-            radioButtonNAT.Size = new Size(228, 24);
-            radioButtonNAT.TabIndex = 0;
-            radioButtonNAT.TabStop = true;
-            radioButtonNAT.Text = "Use network address translation (NAT)";
-            toolTip1.SetToolTip(radioButtonNAT, "Give the guest operating system access to host connection.");
-            radioButtonNAT.UseVisualStyleBackColor = false;
+            this.radioButtonE1000PCIe.Location = new Point(247, 25);
+            this.radioButtonE1000PCIe.Name = "radioButtonE1000PCIe";
+            this.radioButtonE1000PCIe.Size = new Size(139, 24);
+            this.radioButtonE1000PCIe.TabIndex = 0;
+            this.radioButtonE1000PCIe.TabStop = true;
+            this.radioButtonE1000PCIe.Text = "Intel PRO/1000 PCIe";
+            this.radioButtonE1000PCIe.UseVisualStyleBackColor = false;
+
             // 
-            // radioButtonHostOnly
+            // radioButtonPCNet32
             // 
-            radioButtonHostOnly.Location = new Point(15, 52);
-            radioButtonHostOnly.Name = "radioButtonHostOnly";
-            radioButtonHostOnly.Size = new Size(150, 24);
-            radioButtonHostOnly.TabIndex = 0;
-            radioButtonHostOnly.TabStop = true;
-            radioButtonHostOnly.Text = "Use host-only networking";
-            toolTip1.SetToolTip(radioButtonHostOnly, "Connect to private virtual network.");
-            radioButtonHostOnly.UseVisualStyleBackColor = false;
+            radioButtonPCNet32.Location = new Point(15, 52);
+            radioButtonPCNet32.Name = "radioButtonPCNet32";
+            radioButtonPCNet32.Size = new Size(108, 24);
+            radioButtonPCNet32.TabIndex = 0;
+            radioButtonPCNet32.TabStop = true;
+            radioButtonPCNet32.Text = "AMD PCnet-32";
+            radioButtonPCNet32.UseVisualStyleBackColor = false;
+
+            // 
+            // radioButtonVMXNET3
+            // 
+            this.radioButtonVMXNET3.Location = new Point(247, 52);
+            this.radioButtonVMXNET3.Name = "radioButtonVMXNET3";
+            this.radioButtonVMXNET3.Size = new Size(129, 24);
+            this.radioButtonVMXNET3.TabIndex = 0;
+            this.radioButtonVMXNET3.TabStop = true;
+            this.radioButtonVMXNET3.Text = "VMware VMXNET3";
+            this.radioButtonVMXNET3.UseVisualStyleBackColor = false;
+
             // 
             // numericUpDownFloppyCount
             // 
@@ -369,6 +382,7 @@ namespace VMware_VM_Generator
             numericUpDownFloppyCount.Name = "numericUpDownFloppyCount";
             numericUpDownFloppyCount.Size = new Size(60, 23);
             numericUpDownFloppyCount.TabIndex = 4;
+
             // 
             // numericUpDownCDIDECount
             // 
@@ -377,6 +391,7 @@ namespace VMware_VM_Generator
             numericUpDownCDIDECount.Name = "numericUpDownCDIDECount";
             numericUpDownCDIDECount.Size = new Size(60, 23);
             numericUpDownCDIDECount.TabIndex = 5;
+
             // 
             // numericUpDownCDSCSICount
             // 
@@ -385,6 +400,7 @@ namespace VMware_VM_Generator
             numericUpDownCDSCSICount.Name = "numericUpDownCDSCSICount";
             numericUpDownCDSCSICount.Size = new Size(60, 23);
             numericUpDownCDSCSICount.TabIndex = 6;
+
             // 
             // numericUpDownCDSATACount
             // 
@@ -393,6 +409,7 @@ namespace VMware_VM_Generator
             numericUpDownCDSATACount.Name = "numericUpDownCDSATACount";
             numericUpDownCDSATACount.Size = new Size(60, 23);
             numericUpDownCDSATACount.TabIndex = 7;
+
             // 
             // iconFirmware
             // 
@@ -401,6 +418,7 @@ namespace VMware_VM_Generator
             iconFirmware.Size = new Size(16, 16);
             iconFirmware.TabIndex = 0;
             iconFirmware.TabStop = false;
+
             // 
             // iconProcessor
             // 
@@ -409,6 +427,7 @@ namespace VMware_VM_Generator
             iconProcessor.Size = new Size(16, 16);
             iconProcessor.TabIndex = 0;
             iconProcessor.TabStop = false;
+
             // 
             // iconMemory
             // 
@@ -417,6 +436,7 @@ namespace VMware_VM_Generator
             iconMemory.Size = new Size(16, 16);
             iconMemory.TabIndex = 0;
             iconMemory.TabStop = false;
+
             // 
             // iconSound
             // 
@@ -425,6 +445,7 @@ namespace VMware_VM_Generator
             iconSound.Size = new Size(16, 16);
             iconSound.TabIndex = 0;
             iconSound.TabStop = false;
+
             // 
             // iconSCSI
             // 
@@ -433,6 +454,7 @@ namespace VMware_VM_Generator
             iconSCSI.Size = new Size(16, 16);
             iconSCSI.TabIndex = 0;
             iconSCSI.TabStop = false;
+
             // 
             // iconNetwork
             // 
@@ -441,6 +463,7 @@ namespace VMware_VM_Generator
             iconNetwork.Size = new Size(16, 16);
             iconNetwork.TabIndex = 0;
             iconNetwork.TabStop = false;
+
             // 
             // iconFloppy
             // 
@@ -450,6 +473,7 @@ namespace VMware_VM_Generator
             iconFloppy.Size = new Size(16, 16);
             iconFloppy.TabIndex = 0;
             iconFloppy.TabStop = false;
+
             // 
             // iconCDIDE
             // 
@@ -459,6 +483,7 @@ namespace VMware_VM_Generator
             iconCDIDE.Size = new Size(16, 16);
             iconCDIDE.TabIndex = 0;
             iconCDIDE.TabStop = false;
+
             // 
             // iconCDSCSI
             // 
@@ -468,6 +493,7 @@ namespace VMware_VM_Generator
             iconCDSCSI.Size = new Size(16, 16);
             iconCDSCSI.TabIndex = 0;
             iconCDSCSI.TabStop = false;
+
             // 
             // iconCDSATA
             // 
@@ -477,6 +503,7 @@ namespace VMware_VM_Generator
             iconCDSATA.Size = new Size(16, 16);
             iconCDSATA.TabIndex = 0;
             iconCDSATA.TabStop = false;
+
             // 
             // panelWelcome
             // 
@@ -495,6 +522,7 @@ namespace VMware_VM_Generator
             panelWelcome.Name = "panelWelcome";
             panelWelcome.Size = new Size(707, 513);
             panelWelcome.TabIndex = 0;
+
             // 
             // btnWelcomeBack
             // 
@@ -508,6 +536,7 @@ namespace VMware_VM_Generator
             btnWelcomeBack.Text = "< Back";
             btnWelcomeBack.UseVisualStyleBackColor = true;
             btnWelcomeBack.Visible = false;
+
             // 
             // btnWelcomeNext
             // 
@@ -520,6 +549,7 @@ namespace VMware_VM_Generator
             btnWelcomeNext.TabIndex = 1;
             btnWelcomeNext.Text = "Next >";
             btnWelcomeNext.UseVisualStyleBackColor = true;
+
             // 
             // btnWelcomeCancel
             // 
@@ -532,6 +562,7 @@ namespace VMware_VM_Generator
             btnWelcomeCancel.TabIndex = 2;
             btnWelcomeCancel.Text = "Cancel";
             btnWelcomeCancel.UseVisualStyleBackColor = true;
+
             // 
             // labelWelcomeText
             // 
@@ -541,6 +572,7 @@ namespace VMware_VM_Generator
             labelWelcomeText.Size = new Size(385, 43);
             labelWelcomeText.TabIndex = 3;
             labelWelcomeText.Text = "This wizard will guide you through creating a virtual machine with {osName}.";
+
             // 
             // labelWelcomeTitle
             // 
@@ -551,6 +583,7 @@ namespace VMware_VM_Generator
             labelWelcomeTitle.Size = new Size(464, 82);
             labelWelcomeTitle.TabIndex = 4;
             labelWelcomeTitle.Text = "Welcome to the VMware VM Generator wizard of {osName}.";
+
             // 
             // panelWelcomeLeft
             // 
@@ -558,6 +591,7 @@ namespace VMware_VM_Generator
             panelWelcomeLeft.Name = "panelWelcomeLeft";
             panelWelcomeLeft.Size = new Size(118, 369);
             panelWelcomeLeft.TabIndex = 6;
+
             // 
             // panelWelcomeTop
             // 
@@ -565,6 +599,7 @@ namespace VMware_VM_Generator
             panelWelcomeTop.Name = "panelWelcomeTop";
             panelWelcomeTop.Size = new Size(707, 85);
             panelWelcomeTop.TabIndex = 6;
+
             // 
             // pictureBoxWelcomeTopRight
             // 
@@ -575,6 +610,7 @@ namespace VMware_VM_Generator
             pictureBoxWelcomeTopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxWelcomeTopRight.TabIndex = 4;
             pictureBoxWelcomeTopRight.TabStop = false;
+
             // 
             // panelWelcomeBottom
             // 
@@ -582,6 +618,7 @@ namespace VMware_VM_Generator
             panelWelcomeBottom.Name = "panelWelcomeBottom";
             panelWelcomeBottom.Size = new Size(707, 59);
             panelWelcomeBottom.TabIndex = 6;
+
             // 
             // panelWelcomeBackground
             // 
@@ -590,6 +627,7 @@ namespace VMware_VM_Generator
             panelWelcomeBackground.Name = "panelWelcomeBackground";
             panelWelcomeBackground.Size = new Size(589, 369);
             panelWelcomeBackground.TabIndex = 6;
+
             // 
             // iconWelcome
             // 
@@ -598,6 +636,7 @@ namespace VMware_VM_Generator
             iconWelcome.Size = new Size(32, 32);
             iconWelcome.TabIndex = 0;
             iconWelcome.TabStop = false;
+
             // 
             // panelStep1
             // 
@@ -626,6 +665,7 @@ namespace VMware_VM_Generator
             panelStep1.Size = new Size(707, 513);
             panelStep1.TabIndex = 1;
             panelStep1.Visible = false;
+
             // 
             // labelStep1Text
             // 
@@ -635,6 +675,7 @@ namespace VMware_VM_Generator
             labelStep1Text.Size = new Size(374, 20);
             labelStep1Text.TabIndex = 3;
             labelStep1Text.Text = "Specify a name and location for the virtual machine.";
+
             // 
             // labelStep1Title
             // 
@@ -645,6 +686,7 @@ namespace VMware_VM_Generator
             labelStep1Title.Size = new Size(464, 21);
             labelStep1Title.TabIndex = 4;
             labelStep1Title.Text = "Virtual Machine Name and Location";
+
             // 
             // btnStep1Back
             // 
@@ -657,6 +699,7 @@ namespace VMware_VM_Generator
             btnStep1Back.TabIndex = 0;
             btnStep1Back.Text = "< Back";
             btnStep1Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep1Next
             // 
@@ -669,6 +712,7 @@ namespace VMware_VM_Generator
             btnStep1Next.TabIndex = 1;
             btnStep1Next.Text = "Next >";
             btnStep1Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep1Cancel
             // 
@@ -681,6 +725,7 @@ namespace VMware_VM_Generator
             btnStep1Cancel.TabIndex = 2;
             btnStep1Cancel.Text = "Cancel";
             btnStep1Cancel.UseVisualStyleBackColor = true;
+
             // 
             // btnBrowseFolder
             // 
@@ -693,6 +738,7 @@ namespace VMware_VM_Generator
             btnBrowseFolder.TabIndex = 3;
             btnBrowseFolder.Text = "Browse...";
             btnBrowseFolder.UseVisualStyleBackColor = true;
+
             // 
             // labelVMFolder
             // 
@@ -703,6 +749,7 @@ namespace VMware_VM_Generator
             labelVMFolder.Size = new Size(139, 15);
             labelVMFolder.TabIndex = 4;
             labelVMFolder.Text = "Virtual machine location:";
+
             // 
             // txtVMFolder
             // 
@@ -710,6 +757,7 @@ namespace VMware_VM_Generator
             txtVMFolder.Name = "txtVMFolder";
             txtVMFolder.Size = new Size(262, 23);
             txtVMFolder.TabIndex = 5;
+
             // 
             // txtVMName
             // 
@@ -717,6 +765,7 @@ namespace VMware_VM_Generator
             txtVMName.Name = "txtVMName";
             txtVMName.Size = new Size(262, 23);
             txtVMName.TabIndex = 6;
+
             // 
             // labelVMName
             // 
@@ -727,6 +776,7 @@ namespace VMware_VM_Generator
             labelVMName.Size = new Size(126, 15);
             labelVMName.TabIndex = 7;
             labelVMName.Text = "Virtual machine name:";
+
             // 
             // pictureBoxStep1Top
             // 
@@ -735,6 +785,7 @@ namespace VMware_VM_Generator
             pictureBoxStep1Top.Size = new Size(707, 85);
             pictureBoxStep1Top.TabIndex = 4;
             pictureBoxStep1Top.TabStop = false;
+
             // 
             // pictureBoxStep1Bottom
             // 
@@ -743,6 +794,7 @@ namespace VMware_VM_Generator
             pictureBoxStep1Bottom.Size = new Size(707, 59);
             pictureBoxStep1Bottom.TabIndex = 4;
             pictureBoxStep1Bottom.TabStop = false;
+
             // 
             // pictureBoxStep1Left
             // 
@@ -751,6 +803,7 @@ namespace VMware_VM_Generator
             pictureBoxStep1Left.Size = new Size(118, 369);
             pictureBoxStep1Left.TabIndex = 5;
             pictureBoxStep1Left.TabStop = false;
+
             // 
             // panelStep1Left
             // 
@@ -758,6 +811,7 @@ namespace VMware_VM_Generator
             panelStep1Left.Name = "panelStep1Left";
             panelStep1Left.Size = new Size(118, 369);
             panelStep1Left.TabIndex = 6;
+
             // 
             // panelStep1Top
             // 
@@ -765,6 +819,7 @@ namespace VMware_VM_Generator
             panelStep1Top.Name = "panelStep1Top";
             panelStep1Top.Size = new Size(707, 85);
             panelStep1Top.TabIndex = 6;
+
             // 
             // pictureBoxStep1TopRight
             // 
@@ -775,6 +830,7 @@ namespace VMware_VM_Generator
             pictureBoxStep1TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep1TopRight.TabIndex = 4;
             pictureBoxStep1TopRight.TabStop = false;
+
             // 
             // panelStep1Bottom
             // 
@@ -782,6 +838,7 @@ namespace VMware_VM_Generator
             panelStep1Bottom.Name = "panelStep1Bottom";
             panelStep1Bottom.Size = new Size(707, 59);
             panelStep1Bottom.TabIndex = 6;
+
             // 
             // pictureBoxStep1Background
             // 
@@ -790,6 +847,7 @@ namespace VMware_VM_Generator
             pictureBoxStep1Background.Size = new Size(589, 369);
             pictureBoxStep1Background.TabIndex = 5;
             pictureBoxStep1Background.TabStop = false;
+
             // 
             // panelStep1Background
             // 
@@ -798,6 +856,7 @@ namespace VMware_VM_Generator
             panelStep1Background.Name = "panelStep1Background";
             panelStep1Background.Size = new Size(589, 369);
             panelStep1Background.TabIndex = 6;
+
             // 
             // iconFolder
             // 
@@ -806,6 +865,7 @@ namespace VMware_VM_Generator
             iconFolder.Size = new Size(32, 32);
             iconFolder.TabIndex = 0;
             iconFolder.TabStop = false;
+
             // 
             // panelStep2
             // 
@@ -832,6 +892,7 @@ namespace VMware_VM_Generator
             panelStep2.Size = new Size(707, 513);
             panelStep2.TabIndex = 0;
             panelStep2.Visible = false;
+
             // 
             // labelStep2Text
             // 
@@ -841,6 +902,7 @@ namespace VMware_VM_Generator
             labelStep2Text.Size = new Size(374, 20);
             labelStep2Text.TabIndex = 3;
             labelStep2Text.Text = "Configure processors, memory, and firmware type.";
+
             // 
             // labelStep2Title
             // 
@@ -851,6 +913,7 @@ namespace VMware_VM_Generator
             labelStep2Title.Size = new Size(464, 21);
             labelStep2Title.TabIndex = 4;
             labelStep2Title.Text = "Virtual Machine Hardware Configuration";
+
             // 
             // processors
             // 
@@ -867,6 +930,7 @@ namespace VMware_VM_Generator
             processors.TabIndex = 3;
             processors.TabStop = false;
             processors.Text = "Processors";
+
             // 
             // comboBoxNumberOfCoresPerProcessor
             // 
@@ -875,6 +939,7 @@ namespace VMware_VM_Generator
             comboBoxNumberOfCoresPerProcessor.Name = "comboBoxNumberOfCoresPerProcessor";
             comboBoxNumberOfCoresPerProcessor.Size = new Size(64, 23);
             comboBoxNumberOfCoresPerProcessor.TabIndex = 1;
+
             // 
             // comboNumberOfProcessors
             // 
@@ -883,6 +948,7 @@ namespace VMware_VM_Generator
             comboNumberOfProcessors.Name = "comboNumberOfProcessors";
             comboNumberOfProcessors.Size = new Size(64, 23);
             comboNumberOfProcessors.TabIndex = 1;
+
             // 
             // labelNumberOfCoresPerProcessor
             // 
@@ -892,6 +958,7 @@ namespace VMware_VM_Generator
             labelNumberOfCoresPerProcessor.Size = new Size(173, 15);
             labelNumberOfCoresPerProcessor.TabIndex = 0;
             labelNumberOfCoresPerProcessor.Text = "Number of cores per processor:";
+
             // 
             // labelTotalOfCoresX
             // 
@@ -901,6 +968,7 @@ namespace VMware_VM_Generator
             labelTotalOfCoresX.Size = new Size(94, 15);
             labelTotalOfCoresX.TabIndex = 0;
             labelTotalOfCoresX.Text = "<Total of cores>";
+
             // 
             // labelTotalOfCores
             // 
@@ -910,6 +978,7 @@ namespace VMware_VM_Generator
             labelTotalOfCores.Size = new Size(81, 15);
             labelTotalOfCores.TabIndex = 0;
             labelTotalOfCores.Text = "Total of cores:";
+
             // 
             // labelNumberOfProcessors
             // 
@@ -919,6 +988,7 @@ namespace VMware_VM_Generator
             labelNumberOfProcessors.Size = new Size(127, 15);
             labelNumberOfProcessors.TabIndex = 0;
             labelNumberOfProcessors.Text = "Number of processors:";
+
             // 
             // memory
             // 
@@ -935,6 +1005,7 @@ namespace VMware_VM_Generator
             memory.TabIndex = 3;
             memory.TabStop = false;
             memory.Text = "Memory";
+
             // 
             // trackBarMemory
             // 
@@ -943,6 +1014,7 @@ namespace VMware_VM_Generator
             trackBarMemory.Name = "trackBarMemory";
             trackBarMemory.Size = new Size(543, 45);
             trackBarMemory.TabIndex = 2;
+
             // 
             // numericUpDownMemory
             // 
@@ -951,6 +1023,7 @@ namespace VMware_VM_Generator
             numericUpDownMemory.Name = "numericUpDownMemory";
             numericUpDownMemory.Size = new Size(120, 23);
             numericUpDownMemory.TabIndex = 1;
+
             // 
             // labelMemory
             // 
@@ -960,6 +1033,7 @@ namespace VMware_VM_Generator
             labelMemory.Size = new Size(180, 15);
             labelMemory.TabIndex = 0;
             labelMemory.Text = "Memory for this virtual machine:";
+
             // 
             // labelRecommendedMin
             // 
@@ -972,6 +1046,7 @@ namespace VMware_VM_Generator
             labelRecommendedMin.Size = new Size(107, 12);
             labelRecommendedMin.TabIndex = 3;
             labelRecommendedMin.Text = "Recommended Minimum:";
+
             // 
             // labelRecommendedDefault
             // 
@@ -984,6 +1059,7 @@ namespace VMware_VM_Generator
             labelRecommendedDefault.Size = new Size(98, 12);
             labelRecommendedDefault.TabIndex = 4;
             labelRecommendedDefault.Text = "Recommended Default:";
+
             // 
             // labelRecommendedMax
             // 
@@ -996,6 +1072,7 @@ namespace VMware_VM_Generator
             labelRecommendedMax.Size = new Size(109, 12);
             labelRecommendedMax.TabIndex = 5;
             labelRecommendedMax.Text = "Recommended Maximum:";
+
             // 
             // firmwareType
             // 
@@ -1008,6 +1085,7 @@ namespace VMware_VM_Generator
             firmwareType.TabIndex = 3;
             firmwareType.TabStop = false;
             firmwareType.Text = "Firmware Type";
+
             // 
             // uefi
             // 
@@ -1019,6 +1097,7 @@ namespace VMware_VM_Generator
             uefi.TabStop = true;
             uefi.Text = "UEFI";
             uefi.UseVisualStyleBackColor = false;
+
             // 
             // bios
             // 
@@ -1030,6 +1109,7 @@ namespace VMware_VM_Generator
             bios.TabStop = true;
             bios.Text = "BIOS";
             bios.UseVisualStyleBackColor = false;
+
             // 
             // btnStep2Back
             // 
@@ -1042,6 +1122,7 @@ namespace VMware_VM_Generator
             btnStep2Back.TabIndex = 0;
             btnStep2Back.Text = "< Back";
             btnStep2Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep2Next
             // 
@@ -1054,6 +1135,7 @@ namespace VMware_VM_Generator
             btnStep2Next.TabIndex = 1;
             btnStep2Next.Text = "Next >";
             btnStep2Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep2Cancel
             // 
@@ -1066,6 +1148,7 @@ namespace VMware_VM_Generator
             btnStep2Cancel.TabIndex = 2;
             btnStep2Cancel.Text = "Cancel";
             btnStep2Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep2Top
             // 
@@ -1074,6 +1157,7 @@ namespace VMware_VM_Generator
             pictureBoxStep2Top.Size = new Size(707, 85);
             pictureBoxStep2Top.TabIndex = 4;
             pictureBoxStep2Top.TabStop = false;
+
             // 
             // pictureBoxStep2Bottom
             // 
@@ -1082,6 +1166,7 @@ namespace VMware_VM_Generator
             pictureBoxStep2Bottom.Size = new Size(707, 59);
             pictureBoxStep2Bottom.TabIndex = 4;
             pictureBoxStep2Bottom.TabStop = false;
+
             // 
             // pictureBoxStep2Left
             // 
@@ -1090,6 +1175,7 @@ namespace VMware_VM_Generator
             pictureBoxStep2Left.Size = new Size(118, 369);
             pictureBoxStep2Left.TabIndex = 5;
             pictureBoxStep2Left.TabStop = false;
+
             // 
             // pictureBoxStep2Background
             // 
@@ -1098,6 +1184,7 @@ namespace VMware_VM_Generator
             pictureBoxStep2Background.Size = new Size(589, 369);
             pictureBoxStep2Background.TabIndex = 5;
             pictureBoxStep2Background.TabStop = false;
+
             // 
             // panelStep2Left
             // 
@@ -1105,6 +1192,7 @@ namespace VMware_VM_Generator
             panelStep2Left.Name = "panelStep2Left";
             panelStep2Left.Size = new Size(118, 369);
             panelStep2Left.TabIndex = 6;
+
             // 
             // panelStep2Top
             // 
@@ -1112,6 +1200,7 @@ namespace VMware_VM_Generator
             panelStep2Top.Name = "panelStep2Top";
             panelStep2Top.Size = new Size(707, 85);
             panelStep2Top.TabIndex = 6;
+
             // 
             // pictureBoxStep2TopRight
             // 
@@ -1122,6 +1211,7 @@ namespace VMware_VM_Generator
             pictureBoxStep2TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep2TopRight.TabIndex = 4;
             pictureBoxStep2TopRight.TabStop = false;
+
             // 
             // panelStep2Bottom
             // 
@@ -1129,6 +1219,7 @@ namespace VMware_VM_Generator
             panelStep2Bottom.Name = "panelStep2Bottom";
             panelStep2Bottom.Size = new Size(707, 59);
             panelStep2Bottom.TabIndex = 6;
+
             // 
             // panelStep2Background
             // 
@@ -1136,6 +1227,7 @@ namespace VMware_VM_Generator
             panelStep2Background.Name = "panelStep2Background";
             panelStep2Background.Size = new Size(589, 369);
             panelStep2Background.TabIndex = 6;
+
             // 
             // panelStep3
             // 
@@ -1162,6 +1254,7 @@ namespace VMware_VM_Generator
             panelStep3.Size = new Size(707, 513);
             panelStep3.TabIndex = 0;
             panelStep3.Visible = false;
+
             // 
             // labelStep3Text
             // 
@@ -1171,6 +1264,7 @@ namespace VMware_VM_Generator
             labelStep3Text.Size = new Size(374, 20);
             labelStep3Text.TabIndex = 3;
             labelStep3Text.Text = "Configure sound cards, SCSI controllers, and networking.";
+
             // 
             // labelStep3Title
             // 
@@ -1181,6 +1275,7 @@ namespace VMware_VM_Generator
             labelStep3Title.Size = new Size(464, 21);
             labelStep3Title.TabIndex = 4;
             labelStep3Title.Text = "Peripherals and Network Connection";
+
             // 
             // groupBoxSoundCard
             // 
@@ -1194,6 +1289,7 @@ namespace VMware_VM_Generator
             groupBoxSoundCard.TabIndex = 3;
             groupBoxSoundCard.TabStop = false;
             groupBoxSoundCard.Text = "Sound Card";
+
             // 
             // radioButtonHDAudio
             // 
@@ -1204,6 +1300,7 @@ namespace VMware_VM_Generator
             radioButtonHDAudio.TabStop = true;
             radioButtonHDAudio.Text = "Intel High Definition Audio";
             radioButtonHDAudio.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonES1371
             // 
@@ -1214,6 +1311,7 @@ namespace VMware_VM_Generator
             radioButtonES1371.TabStop = true;
             radioButtonES1371.Text = "Creative Ensoniq AudioPCI";
             radioButtonES1371.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonSB16
             // 
@@ -1224,6 +1322,7 @@ namespace VMware_VM_Generator
             radioButtonSB16.TabStop = true;
             radioButtonSB16.Text = "Creative Labs Sound Blaster 16";
             radioButtonSB16.UseVisualStyleBackColor = false;
+
             // 
             // groupBoxSCSIIO
             // 
@@ -1238,6 +1337,7 @@ namespace VMware_VM_Generator
             groupBoxSCSIIO.TabIndex = 3;
             groupBoxSCSIIO.TabStop = false;
             groupBoxSCSIIO.Text = "SCSI I/O Controller";
+
             // 
             // radioParavirtualizedSCSI
             // 
@@ -1249,6 +1349,7 @@ namespace VMware_VM_Generator
             radioParavirtualizedSCSI.TabStop = true;
             radioParavirtualizedSCSI.Text = "Paravirtualized SCSI";
             radioParavirtualizedSCSI.UseVisualStyleBackColor = false;
+
             // 
             // radioLSILogicSAS
             // 
@@ -1260,6 +1361,7 @@ namespace VMware_VM_Generator
             radioLSILogicSAS.TabStop = true;
             radioLSILogicSAS.Text = "LSI Logic SAS";
             radioLSILogicSAS.UseVisualStyleBackColor = false;
+
             // 
             // radioLSILogic
             // 
@@ -1271,6 +1373,7 @@ namespace VMware_VM_Generator
             radioLSILogic.TabStop = true;
             radioLSILogic.Text = "LSI Logic";
             radioLSILogic.UseVisualStyleBackColor = false;
+
             // 
             // radioBusLogic
             // 
@@ -1281,30 +1384,22 @@ namespace VMware_VM_Generator
             radioBusLogic.TabStop = true;
             radioBusLogic.Text = "BusLogic (Maximum drive capacity: 2 TB)";
             radioBusLogic.UseVisualStyleBackColor = false;
+
             // 
             // groupBoxNetwork
             // 
             groupBoxNetwork.Controls.Add(iconNetwork);
-            groupBoxNetwork.Controls.Add(radioButtonNoNetwork);
-            groupBoxNetwork.Controls.Add(radioButtonHostOnly);
-            groupBoxNetwork.Controls.Add(radioButtonNAT);
-            groupBoxNetwork.Controls.Add(radioButtonBridged);
+            groupBoxNetwork.Controls.Add(this.radioButtonVMXNET3);
+            groupBoxNetwork.Controls.Add(radioButtonPCNet32);
+            groupBoxNetwork.Controls.Add(this.radioButtonE1000PCIe);
+            groupBoxNetwork.Controls.Add(this.radioButtonE1000PCI);
             groupBoxNetwork.Location = new Point(124, 349);
             groupBoxNetwork.Name = "groupBoxNetwork";
             groupBoxNetwork.Size = new Size(571, 89);
             groupBoxNetwork.TabIndex = 3;
             groupBoxNetwork.TabStop = false;
-            groupBoxNetwork.Text = "Network";
-            // 
-            // radioButtonNoNetwork
-            // 
-            radioButtonNoNetwork.Location = new Point(247, 52);
-            radioButtonNoNetwork.Name = "radioButtonNoNetwork";
-            radioButtonNoNetwork.Size = new Size(150, 24);
-            radioButtonNoNetwork.TabIndex = 0;
-            radioButtonNoNetwork.TabStop = true;
-            radioButtonNoNetwork.Text = "Do not use a network connection";
-            radioButtonNoNetwork.UseVisualStyleBackColor = false;
+            groupBoxNetwork.Text = "Network Card";
+
             // 
             // btnStep3Back
             // 
@@ -1317,6 +1412,7 @@ namespace VMware_VM_Generator
             btnStep3Back.TabIndex = 0;
             btnStep3Back.Text = "< Back";
             btnStep3Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep3Next
             // 
@@ -1329,6 +1425,7 @@ namespace VMware_VM_Generator
             btnStep3Next.TabIndex = 1;
             btnStep3Next.Text = "Next >";
             btnStep3Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep3Cancel
             // 
@@ -1341,6 +1438,7 @@ namespace VMware_VM_Generator
             btnStep3Cancel.TabIndex = 2;
             btnStep3Cancel.Text = "Cancel";
             btnStep3Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep3Top
             // 
@@ -1349,6 +1447,7 @@ namespace VMware_VM_Generator
             pictureBoxStep3Top.Size = new Size(707, 85);
             pictureBoxStep3Top.TabIndex = 4;
             pictureBoxStep3Top.TabStop = false;
+
             // 
             // pictureBoxStep3Bottom
             // 
@@ -1357,6 +1456,7 @@ namespace VMware_VM_Generator
             pictureBoxStep3Bottom.Size = new Size(707, 59);
             pictureBoxStep3Bottom.TabIndex = 4;
             pictureBoxStep3Bottom.TabStop = false;
+
             // 
             // pictureBoxStep3Left
             // 
@@ -1365,6 +1465,7 @@ namespace VMware_VM_Generator
             pictureBoxStep3Left.Size = new Size(118, 369);
             pictureBoxStep3Left.TabIndex = 5;
             pictureBoxStep3Left.TabStop = false;
+
             // 
             // pictureBoxStep3Background
             // 
@@ -1373,6 +1474,7 @@ namespace VMware_VM_Generator
             pictureBoxStep3Background.Size = new Size(589, 369);
             pictureBoxStep3Background.TabIndex = 5;
             pictureBoxStep3Background.TabStop = false;
+
             // 
             // panelStep3Left
             // 
@@ -1380,6 +1482,7 @@ namespace VMware_VM_Generator
             panelStep3Left.Name = "panelStep3Left";
             panelStep3Left.Size = new Size(118, 369);
             panelStep3Left.TabIndex = 6;
+
             // 
             // panelStep3Top
             // 
@@ -1387,6 +1490,7 @@ namespace VMware_VM_Generator
             panelStep3Top.Name = "panelStep3Top";
             panelStep3Top.Size = new Size(707, 85);
             panelStep3Top.TabIndex = 6;
+
             // 
             // pictureBoxStep3TopRight
             // 
@@ -1397,6 +1501,7 @@ namespace VMware_VM_Generator
             pictureBoxStep3TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep3TopRight.TabIndex = 4;
             pictureBoxStep3TopRight.TabStop = false;
+
             // 
             // panelStep3Bottom
             // 
@@ -1404,6 +1509,7 @@ namespace VMware_VM_Generator
             panelStep3Bottom.Name = "panelStep3Bottom";
             panelStep3Bottom.Size = new Size(707, 59);
             panelStep3Bottom.TabIndex = 6;
+
             // 
             // panelStep3Background
             // 
@@ -1411,6 +1517,7 @@ namespace VMware_VM_Generator
             panelStep3Background.Name = "panelStep3Background";
             panelStep3Background.Size = new Size(589, 369);
             panelStep3Background.TabIndex = 6;
+
             // 
             // panelStep4
             // 
@@ -1443,6 +1550,7 @@ namespace VMware_VM_Generator
             panelStep4.Size = new Size(707, 513);
             panelStep4.TabIndex = 1;
             panelStep4.Visible = false;
+
             // 
             // labelStep4Text
             // 
@@ -1452,6 +1560,7 @@ namespace VMware_VM_Generator
             labelStep4Text.Size = new Size(374, 20);
             labelStep4Text.TabIndex = 3;
             labelStep4Text.Text = "Specify disk type, capacity, and allocation options.";
+
             // 
             // labelStep4Title
             // 
@@ -1462,6 +1571,7 @@ namespace VMware_VM_Generator
             labelStep4Title.Size = new Size(464, 21);
             labelStep4Title.TabIndex = 4;
             labelStep4Title.Text = "Virtual Hard Disk";
+
             // 
             // radioButtonSplit
             // 
@@ -1473,6 +1583,7 @@ namespace VMware_VM_Generator
             radioButtonSplit.TabStop = true;
             radioButtonSplit.Text = "Split the virtual drive into multiple files";
             radioButtonSplit.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonSingle
             // 
@@ -1484,6 +1595,7 @@ namespace VMware_VM_Generator
             radioButtonSingle.TabStop = true;
             radioButtonSingle.Text = "Store the virtual drive as a single file";
             radioButtonSingle.UseVisualStyleBackColor = false;
+
             // 
             // labelSplit
             // 
@@ -1493,6 +1605,7 @@ namespace VMware_VM_Generator
             labelSplit.Size = new Size(459, 38);
             labelSplit.TabIndex = 7;
             labelSplit.Text = "Splitting the drive makes it easier to move the virtual machine to another computer.";
+
             // 
             // labelAllocate
             // 
@@ -1502,6 +1615,7 @@ namespace VMware_VM_Generator
             labelAllocate.Size = new Size(354, 79);
             labelAllocate.TabIndex = 7;
             labelAllocate.Text = resources.GetString("labelAllocate.Text");
+
             // 
             // checkBoxAllocate
             // 
@@ -1512,6 +1626,7 @@ namespace VMware_VM_Generator
             checkBoxAllocate.TabIndex = 6;
             checkBoxAllocate.Text = "Allocate all drive space now";
             checkBoxAllocate.UseVisualStyleBackColor = false;
+
             // 
             // numericUpDownDriveCapacity
             // 
@@ -1519,6 +1634,7 @@ namespace VMware_VM_Generator
             numericUpDownDriveCapacity.Name = "numericUpDownDriveCapacity";
             numericUpDownDriveCapacity.Size = new Size(89, 23);
             numericUpDownDriveCapacity.TabIndex = 5;
+
             // 
             // labelRecommendedDriveCapacity
             // 
@@ -1529,6 +1645,7 @@ namespace VMware_VM_Generator
             labelRecommendedDriveCapacity.Size = new Size(286, 15);
             labelRecommendedDriveCapacity.TabIndex = 4;
             labelRecommendedDriveCapacity.Text = "Recommended capacity for {osName}: {Capacity} GB";
+
             // 
             // labelDriveCapacity
             // 
@@ -1539,6 +1656,7 @@ namespace VMware_VM_Generator
             labelDriveCapacity.Size = new Size(146, 15);
             labelDriveCapacity.TabIndex = 4;
             labelDriveCapacity.Text = "Virtual drive capacity (GB):";
+
             // 
             // groupBoxVirtualDriveType
             // 
@@ -1552,6 +1670,7 @@ namespace VMware_VM_Generator
             groupBoxVirtualDriveType.TabIndex = 3;
             groupBoxVirtualDriveType.TabStop = false;
             groupBoxVirtualDriveType.Text = "Virtual Drive Type";
+
             // 
             // radioButtonNVMe
             // 
@@ -1563,6 +1682,7 @@ namespace VMware_VM_Generator
             radioButtonNVMe.TabStop = true;
             radioButtonNVMe.Text = "NVMe";
             radioButtonNVMe.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonSATA
             // 
@@ -1574,6 +1694,7 @@ namespace VMware_VM_Generator
             radioButtonSATA.TabStop = true;
             radioButtonSATA.Text = "SATA";
             radioButtonSATA.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonSCSI
             // 
@@ -1585,6 +1706,7 @@ namespace VMware_VM_Generator
             radioButtonSCSI.TabStop = true;
             radioButtonSCSI.Text = "SCSI";
             radioButtonSCSI.UseVisualStyleBackColor = false;
+
             // 
             // radioButtonIDE
             // 
@@ -1596,6 +1718,7 @@ namespace VMware_VM_Generator
             radioButtonIDE.TabStop = true;
             radioButtonIDE.Text = "IDE";
             radioButtonIDE.UseVisualStyleBackColor = false;
+
             // 
             // btnStep4Back
             // 
@@ -1608,6 +1731,7 @@ namespace VMware_VM_Generator
             btnStep4Back.TabIndex = 0;
             btnStep4Back.Text = "< Back";
             btnStep4Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep4Next
             // 
@@ -1620,6 +1744,7 @@ namespace VMware_VM_Generator
             btnStep4Next.TabIndex = 1;
             btnStep4Next.Text = "Next >";
             btnStep4Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep4Cancel
             // 
@@ -1632,6 +1757,7 @@ namespace VMware_VM_Generator
             btnStep4Cancel.TabIndex = 2;
             btnStep4Cancel.Text = "Cancel";
             btnStep4Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep4Top
             // 
@@ -1640,6 +1766,7 @@ namespace VMware_VM_Generator
             pictureBoxStep4Top.Size = new Size(707, 85);
             pictureBoxStep4Top.TabIndex = 4;
             pictureBoxStep4Top.TabStop = false;
+
             // 
             // pictureBoxStep4Bottom
             // 
@@ -1648,6 +1775,7 @@ namespace VMware_VM_Generator
             pictureBoxStep4Bottom.Size = new Size(707, 59);
             pictureBoxStep4Bottom.TabIndex = 4;
             pictureBoxStep4Bottom.TabStop = false;
+
             // 
             // pictureBoxStep4Left
             // 
@@ -1656,6 +1784,7 @@ namespace VMware_VM_Generator
             pictureBoxStep4Left.Size = new Size(118, 369);
             pictureBoxStep4Left.TabIndex = 5;
             pictureBoxStep4Left.TabStop = false;
+
             // 
             // panelStep4Left
             // 
@@ -1663,6 +1792,7 @@ namespace VMware_VM_Generator
             panelStep4Left.Name = "panelStep4Left";
             panelStep4Left.Size = new Size(118, 369);
             panelStep4Left.TabIndex = 6;
+
             // 
             // panelStep4Top
             // 
@@ -1670,6 +1800,7 @@ namespace VMware_VM_Generator
             panelStep4Top.Name = "panelStep4Top";
             panelStep4Top.Size = new Size(707, 85);
             panelStep4Top.TabIndex = 6;
+
             // 
             // pictureBoxStep4TopRight
             // 
@@ -1680,6 +1811,7 @@ namespace VMware_VM_Generator
             pictureBoxStep4TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep4TopRight.TabIndex = 4;
             pictureBoxStep4TopRight.TabStop = false;
+
             // 
             // panelStep4Bottom
             // 
@@ -1687,6 +1819,7 @@ namespace VMware_VM_Generator
             panelStep4Bottom.Name = "panelStep4Bottom";
             panelStep4Bottom.Size = new Size(707, 59);
             panelStep4Bottom.TabIndex = 6;
+
             // 
             // pictureBoxStep4Background
             // 
@@ -1695,6 +1828,7 @@ namespace VMware_VM_Generator
             pictureBoxStep4Background.Size = new Size(589, 369);
             pictureBoxStep4Background.TabIndex = 5;
             pictureBoxStep4Background.TabStop = false;
+
             // 
             // panelStep4Background
             // 
@@ -1703,6 +1837,7 @@ namespace VMware_VM_Generator
             panelStep4Background.Name = "panelStep4Background";
             panelStep4Background.Size = new Size(589, 369);
             panelStep4Background.TabIndex = 6;
+
             // 
             // iconHardDrive
             // 
@@ -1711,6 +1846,7 @@ namespace VMware_VM_Generator
             iconHardDrive.Size = new Size(32, 32);
             iconHardDrive.TabIndex = 0;
             iconHardDrive.TabStop = false;
+
             // 
             // panelStep5
             // 
@@ -1748,6 +1884,7 @@ namespace VMware_VM_Generator
             panelStep5.Size = new Size(707, 513);
             panelStep5.TabIndex = 2;
             panelStep5.Visible = false;
+
             // 
             // labelStep5Text
             // 
@@ -1757,6 +1894,7 @@ namespace VMware_VM_Generator
             labelStep5Text.Size = new Size(374, 20);
             labelStep5Text.TabIndex = 3;
             labelStep5Text.Text = "Configure additional optical and floppy drives.";
+
             // 
             // labelStep5Title
             // 
@@ -1767,6 +1905,7 @@ namespace VMware_VM_Generator
             labelStep5Title.Size = new Size(464, 21);
             labelStep5Title.TabIndex = 4;
             labelStep5Title.Text = "CD/DVD and Floppy Drives";
+
             // 
             // labelCDLimit
             // 
@@ -1776,6 +1915,7 @@ namespace VMware_VM_Generator
             labelCDLimit.Size = new Size(413, 51);
             labelCDLimit.TabIndex = 8;
             labelCDLimit.Text = "The virtual machine can have up to 2 floppy drives, up to 3 IDE CD/DVD drives, up to 10 SCSI CD/DVD drives, and up to 10 SATA CD/DVD drives.";
+
             // 
             // labelUsedCDController
             // 
@@ -1786,6 +1926,7 @@ namespace VMware_VM_Generator
             labelUsedCDController.Size = new Size(380, 15);
             labelUsedCDController.TabIndex = 8;
             labelUsedCDController.Text = "The controller used for the disc of the operating system: {CDcontroller}";
+
             // 
             // labelNumberOfCDSATA
             // 
@@ -1796,6 +1937,7 @@ namespace VMware_VM_Generator
             labelNumberOfCDSATA.Size = new Size(188, 15);
             labelNumberOfCDSATA.TabIndex = 3;
             labelNumberOfCDSATA.Text = "Number of CD/DVD Drives (SATA):";
+
             // 
             // labelNumberOfCDSCSI
             // 
@@ -1806,6 +1948,7 @@ namespace VMware_VM_Generator
             labelNumberOfCDSCSI.Size = new Size(184, 15);
             labelNumberOfCDSCSI.TabIndex = 3;
             labelNumberOfCDSCSI.Text = "Number of CD/DVD Drives (SCSI):";
+
             // 
             // labelNumberOfCDIDE
             // 
@@ -1816,6 +1959,7 @@ namespace VMware_VM_Generator
             labelNumberOfCDIDE.Size = new Size(178, 15);
             labelNumberOfCDIDE.TabIndex = 3;
             labelNumberOfCDIDE.Text = "Number of CD/DVD Drives (IDE):";
+
             // 
             // labelNumberOfFloppy
             // 
@@ -1826,6 +1970,7 @@ namespace VMware_VM_Generator
             labelNumberOfFloppy.Size = new Size(142, 15);
             labelNumberOfFloppy.TabIndex = 3;
             labelNumberOfFloppy.Text = "Number of Floppy Drives:";
+
             // 
             // btnStep5Back
             // 
@@ -1838,6 +1983,7 @@ namespace VMware_VM_Generator
             btnStep5Back.TabIndex = 0;
             btnStep5Back.Text = "< Back";
             btnStep5Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep5Next
             // 
@@ -1850,6 +1996,7 @@ namespace VMware_VM_Generator
             btnStep5Next.TabIndex = 1;
             btnStep5Next.Text = "Next >";
             btnStep5Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep5Cancel
             // 
@@ -1862,6 +2009,7 @@ namespace VMware_VM_Generator
             btnStep5Cancel.TabIndex = 2;
             btnStep5Cancel.Text = "Cancel";
             btnStep5Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep5Top
             // 
@@ -1870,6 +2018,7 @@ namespace VMware_VM_Generator
             pictureBoxStep5Top.Size = new Size(707, 85);
             pictureBoxStep5Top.TabIndex = 4;
             pictureBoxStep5Top.TabStop = false;
+
             // 
             // pictureBoxStep5Bottom
             // 
@@ -1878,6 +2027,7 @@ namespace VMware_VM_Generator
             pictureBoxStep5Bottom.Size = new Size(707, 59);
             pictureBoxStep5Bottom.TabIndex = 4;
             pictureBoxStep5Bottom.TabStop = false;
+
             // 
             // pictureBoxStep5Left
             // 
@@ -1886,6 +2036,7 @@ namespace VMware_VM_Generator
             pictureBoxStep5Left.Size = new Size(118, 369);
             pictureBoxStep5Left.TabIndex = 5;
             pictureBoxStep5Left.TabStop = false;
+
             // 
             // pictureBoxStep5Background
             // 
@@ -1894,6 +2045,7 @@ namespace VMware_VM_Generator
             pictureBoxStep5Background.Size = new Size(589, 369);
             pictureBoxStep5Background.TabIndex = 5;
             pictureBoxStep5Background.TabStop = false;
+
             // 
             // panelStep5Left
             // 
@@ -1901,6 +2053,7 @@ namespace VMware_VM_Generator
             panelStep5Left.Name = "panelStep5Left";
             panelStep5Left.Size = new Size(118, 369);
             panelStep5Left.TabIndex = 6;
+
             // 
             // panelStep5Top
             // 
@@ -1908,6 +2061,7 @@ namespace VMware_VM_Generator
             panelStep5Top.Name = "panelStep5Top";
             panelStep5Top.Size = new Size(707, 85);
             panelStep5Top.TabIndex = 6;
+
             // 
             // pictureBoxStep5TopRight
             // 
@@ -1918,6 +2072,7 @@ namespace VMware_VM_Generator
             pictureBoxStep5TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep5TopRight.TabIndex = 4;
             pictureBoxStep5TopRight.TabStop = false;
+
             // 
             // panelStep5Bottom
             // 
@@ -1925,6 +2080,7 @@ namespace VMware_VM_Generator
             panelStep5Bottom.Name = "panelStep5Bottom";
             panelStep5Bottom.Size = new Size(707, 59);
             panelStep5Bottom.TabIndex = 6;
+
             // 
             // panelStep5Background
             // 
@@ -1932,6 +2088,7 @@ namespace VMware_VM_Generator
             panelStep5Background.Name = "panelStep5Background";
             panelStep5Background.Size = new Size(589, 369);
             panelStep5Background.TabIndex = 6;
+
             // 
             // panelStep6
             // 
@@ -1965,6 +2122,7 @@ namespace VMware_VM_Generator
             panelStep6.Size = new Size(707, 513);
             panelStep6.TabIndex = 3;
             panelStep6.Visible = false;
+
             // 
             // labelStep6Text
             // 
@@ -1974,6 +2132,7 @@ namespace VMware_VM_Generator
             labelStep6Text.Size = new Size(374, 20);
             labelStep6Text.TabIndex = 3;
             labelStep6Text.Text = "Choose icons, shortcuts, and startup preferences.";
+
             // 
             // labelStep6Title
             // 
@@ -1984,6 +2143,7 @@ namespace VMware_VM_Generator
             labelStep6Title.Size = new Size(464, 21);
             labelStep6Title.TabIndex = 4;
             labelStep6Title.Text = "Shortcuts and Advanced Options";
+
             // 
             // pictureVMIcon
             // 
@@ -1992,6 +2152,7 @@ namespace VMware_VM_Generator
             pictureVMIcon.Size = new Size(32, 32);
             pictureVMIcon.TabIndex = 12;
             pictureVMIcon.TabStop = false;
+
             // 
             // labelVMIcon
             // 
@@ -2002,6 +2163,7 @@ namespace VMware_VM_Generator
             labelVMIcon.Size = new Size(119, 15);
             labelVMIcon.TabIndex = 11;
             labelVMIcon.Text = "Virtual machine icon:";
+
             // 
             // groupBoxShortcutType
             // 
@@ -2015,6 +2177,7 @@ namespace VMware_VM_Generator
             groupBoxShortcutType.TabIndex = 13;
             groupBoxShortcutType.TabStop = false;
             groupBoxShortcutType.Text = "Shortcut Type";
+
             // 
             // radioShortcutDirect
             // 
@@ -2025,6 +2188,7 @@ namespace VMware_VM_Generator
             radioShortcutDirect.TabIndex = 0;
             radioShortcutDirect.Text = "Direct VMX file shortcut";
             radioShortcutDirect.UseVisualStyleBackColor = true;
+
             // 
             // radioShortcutKvm
             // 
@@ -2035,6 +2199,7 @@ namespace VMware_VM_Generator
             radioShortcutKvm.TabIndex = 1;
             radioShortcutKvm.Text = "KVM shortcut";
             radioShortcutKvm.UseVisualStyleBackColor = true;
+
             // 
             // radioShortcutWorkstation
             // 
@@ -2047,6 +2212,7 @@ namespace VMware_VM_Generator
             radioShortcutWorkstation.TabStop = true;
             radioShortcutWorkstation.Text = "Custom Workstation shortcut";
             radioShortcutWorkstation.UseVisualStyleBackColor = true;
+
             // 
             // checkBoxStartMenu
             // 
@@ -2059,6 +2225,7 @@ namespace VMware_VM_Generator
             checkBoxStartMenu.TabIndex = 10;
             checkBoxStartMenu.Text = "Add start menu shortcut";
             checkBoxStartMenu.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxFullScreen
             // 
@@ -2069,6 +2236,7 @@ namespace VMware_VM_Generator
             checkBoxFullScreen.TabIndex = 10;
             checkBoxFullScreen.Text = "Full screen";
             checkBoxFullScreen.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxClose
             // 
@@ -2079,6 +2247,7 @@ namespace VMware_VM_Generator
             checkBoxClose.TabIndex = 10;
             checkBoxClose.Text = "Close automatically after power off";
             checkBoxClose.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxShortStart
             // 
@@ -2091,6 +2260,7 @@ namespace VMware_VM_Generator
             checkBoxShortStart.TabIndex = 10;
             checkBoxShortStart.Text = "Start the virtual machine automatically";
             checkBoxShortStart.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxNewWindow
             // 
@@ -2103,6 +2273,7 @@ namespace VMware_VM_Generator
             checkBoxNewWindow.TabIndex = 10;
             checkBoxNewWindow.Text = "Always open in a new window";
             checkBoxNewWindow.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxDesktop
             // 
@@ -2115,6 +2286,7 @@ namespace VMware_VM_Generator
             checkBoxDesktop.TabIndex = 10;
             checkBoxDesktop.Text = "Add desktop shortcut";
             checkBoxDesktop.UseVisualStyleBackColor = false;
+
             // 
             // buttonChangeIcon
             // 
@@ -2127,6 +2299,7 @@ namespace VMware_VM_Generator
             buttonChangeIcon.TabIndex = 6;
             buttonChangeIcon.Text = "Change Icon";
             buttonChangeIcon.UseVisualStyleBackColor = true;
+
             // 
             // btnStep6Back
             // 
@@ -2139,6 +2312,7 @@ namespace VMware_VM_Generator
             btnStep6Back.TabIndex = 0;
             btnStep6Back.Text = "< Back";
             btnStep6Back.UseVisualStyleBackColor = true;
+
             // 
             // btnStep6Next
             // 
@@ -2151,6 +2325,7 @@ namespace VMware_VM_Generator
             btnStep6Next.TabIndex = 1;
             btnStep6Next.Text = "Next >";
             btnStep6Next.UseVisualStyleBackColor = true;
+
             // 
             // btnStep6Cancel
             // 
@@ -2163,6 +2338,7 @@ namespace VMware_VM_Generator
             btnStep6Cancel.TabIndex = 2;
             btnStep6Cancel.Text = "Cancel";
             btnStep6Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep6Top
             // 
@@ -2171,6 +2347,7 @@ namespace VMware_VM_Generator
             pictureBoxStep6Top.Size = new Size(707, 85);
             pictureBoxStep6Top.TabIndex = 4;
             pictureBoxStep6Top.TabStop = false;
+
             // 
             // pictureBoxStep6Bottom
             // 
@@ -2179,6 +2356,7 @@ namespace VMware_VM_Generator
             pictureBoxStep6Bottom.Size = new Size(707, 59);
             pictureBoxStep6Bottom.TabIndex = 4;
             pictureBoxStep6Bottom.TabStop = false;
+
             // 
             // pictureBoxStep6Left
             // 
@@ -2187,6 +2365,7 @@ namespace VMware_VM_Generator
             pictureBoxStep6Left.Size = new Size(118, 369);
             pictureBoxStep6Left.TabIndex = 5;
             pictureBoxStep6Left.TabStop = false;
+
             // 
             // pictureBoxStep6Background
             // 
@@ -2195,6 +2374,7 @@ namespace VMware_VM_Generator
             pictureBoxStep6Background.Size = new Size(589, 369);
             pictureBoxStep6Background.TabIndex = 5;
             pictureBoxStep6Background.TabStop = false;
+
             // 
             // panelStep6Left
             // 
@@ -2202,6 +2382,7 @@ namespace VMware_VM_Generator
             panelStep6Left.Name = "panelStep6Left";
             panelStep6Left.Size = new Size(118, 369);
             panelStep6Left.TabIndex = 6;
+
             // 
             // panelStep6Top
             // 
@@ -2209,6 +2390,7 @@ namespace VMware_VM_Generator
             panelStep6Top.Name = "panelStep6Top";
             panelStep6Top.Size = new Size(707, 85);
             panelStep6Top.TabIndex = 6;
+
             // 
             // pictureBoxStep6TopRight
             // 
@@ -2219,6 +2401,7 @@ namespace VMware_VM_Generator
             pictureBoxStep6TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep6TopRight.TabIndex = 4;
             pictureBoxStep6TopRight.TabStop = false;
+
             // 
             // panelStep6Bottom
             // 
@@ -2226,6 +2409,7 @@ namespace VMware_VM_Generator
             panelStep6Bottom.Name = "panelStep6Bottom";
             panelStep6Bottom.Size = new Size(707, 59);
             panelStep6Bottom.TabIndex = 6;
+
             // 
             // panelStep6Background
             // 
@@ -2233,6 +2417,7 @@ namespace VMware_VM_Generator
             panelStep6Background.Name = "panelStep6Background";
             panelStep6Background.Size = new Size(589, 369);
             panelStep6Background.TabIndex = 6;
+
             // 
             // panelStep7
             // 
@@ -2258,6 +2443,7 @@ namespace VMware_VM_Generator
             panelStep7.Size = new Size(707, 513);
             panelStep7.TabIndex = 5;
             panelStep7.Visible = false;
+
             // 
             // SummaryTitleTemplate
             // 
@@ -2267,6 +2453,7 @@ namespace VMware_VM_Generator
             SummaryTitleTemplate.Size = new Size(555, 20);
             SummaryTitleTemplate.TabIndex = 7;
             SummaryTitleTemplate.Text = "Summary of the configuration of the virtual machine {vmName}:";
+
             // 
             // labelSummaryText
             // 
@@ -2276,6 +2463,7 @@ namespace VMware_VM_Generator
             labelSummaryText.Size = new Size(374, 20);
             labelSummaryText.TabIndex = 3;
             labelSummaryText.Text = "Review the configuration summary below before creation.";
+
             // 
             // labelSummaryTitle
             // 
@@ -2286,6 +2474,7 @@ namespace VMware_VM_Generator
             labelSummaryTitle.Size = new Size(464, 21);
             labelSummaryTitle.TabIndex = 4;
             labelSummaryTitle.Text = "Ready to Create the Virtual Machine";
+
             // 
             // txtSummary
             // 
@@ -2296,6 +2485,7 @@ namespace VMware_VM_Generator
             txtSummary.ScrollBars = ScrollBars.Vertical;
             txtSummary.Size = new Size(555, 274);
             txtSummary.TabIndex = 3;
+
             // 
             // btnStep7Back
             // 
@@ -2308,6 +2498,7 @@ namespace VMware_VM_Generator
             btnStep7Back.TabIndex = 0;
             btnStep7Back.Text = "< Back";
             btnStep7Back.UseVisualStyleBackColor = true;
+
             // 
             // btnCreate
             // 
@@ -2320,6 +2511,7 @@ namespace VMware_VM_Generator
             btnCreate.TabIndex = 1;
             btnCreate.Text = "Create";
             btnCreate.UseVisualStyleBackColor = true;
+
             // 
             // btnStep7Cancel
             // 
@@ -2332,6 +2524,7 @@ namespace VMware_VM_Generator
             btnStep7Cancel.TabIndex = 2;
             btnStep7Cancel.Text = "Cancel";
             btnStep7Cancel.UseVisualStyleBackColor = true;
+
             // 
             // pictureBoxStep7Top
             // 
@@ -2340,6 +2533,7 @@ namespace VMware_VM_Generator
             pictureBoxStep7Top.Size = new Size(707, 85);
             pictureBoxStep7Top.TabIndex = 4;
             pictureBoxStep7Top.TabStop = false;
+
             // 
             // pictureBoxStep7Bottom
             // 
@@ -2348,6 +2542,7 @@ namespace VMware_VM_Generator
             pictureBoxStep7Bottom.Size = new Size(707, 59);
             pictureBoxStep7Bottom.TabIndex = 4;
             pictureBoxStep7Bottom.TabStop = false;
+
             // 
             // pictureBoxStep7Left
             // 
@@ -2356,6 +2551,7 @@ namespace VMware_VM_Generator
             pictureBoxStep7Left.Size = new Size(118, 369);
             pictureBoxStep7Left.TabIndex = 5;
             pictureBoxStep7Left.TabStop = false;
+
             // 
             // pictureBoxStep7Background
             // 
@@ -2364,6 +2560,7 @@ namespace VMware_VM_Generator
             pictureBoxStep7Background.Size = new Size(589, 369);
             pictureBoxStep7Background.TabIndex = 5;
             pictureBoxStep7Background.TabStop = false;
+
             // 
             // panelStep7Left
             // 
@@ -2371,6 +2568,7 @@ namespace VMware_VM_Generator
             panelStep7Left.Name = "panelStep7Left";
             panelStep7Left.Size = new Size(118, 369);
             panelStep7Left.TabIndex = 6;
+
             // 
             // panelStep7Top
             // 
@@ -2378,6 +2576,7 @@ namespace VMware_VM_Generator
             panelStep7Top.Name = "panelStep7Top";
             panelStep7Top.Size = new Size(707, 85);
             panelStep7Top.TabIndex = 6;
+
             // 
             // pictureBoxStep7TopRight
             // 
@@ -2388,6 +2587,7 @@ namespace VMware_VM_Generator
             pictureBoxStep7TopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxStep7TopRight.TabIndex = 4;
             pictureBoxStep7TopRight.TabStop = false;
+
             // 
             // panelStep7Bottom
             // 
@@ -2395,6 +2595,7 @@ namespace VMware_VM_Generator
             panelStep7Bottom.Name = "panelStep7Bottom";
             panelStep7Bottom.Size = new Size(707, 59);
             panelStep7Bottom.TabIndex = 6;
+
             // 
             // panelStep7Background
             // 
@@ -2402,6 +2603,7 @@ namespace VMware_VM_Generator
             panelStep7Background.Name = "panelStep7Background";
             panelStep7Background.Size = new Size(589, 369);
             panelStep7Background.TabIndex = 6;
+
             // 
             // panelFinish
             // 
@@ -2425,6 +2627,7 @@ namespace VMware_VM_Generator
             panelFinish.Size = new Size(707, 513);
             panelFinish.TabIndex = 4;
             panelFinish.Visible = false;
+
             // 
             // checkBoxOpenFolder
             // 
@@ -2436,6 +2639,7 @@ namespace VMware_VM_Generator
             checkBoxOpenFolder.TabIndex = 10;
             checkBoxOpenFolder.Text = "Open the folder of the virtual machine";
             checkBoxOpenFolder.UseVisualStyleBackColor = false;
+
             // 
             // checkBoxStartVM
             // 
@@ -2449,6 +2653,7 @@ namespace VMware_VM_Generator
             checkBoxStartVM.TabIndex = 10;
             checkBoxStartVM.Text = "Start the virtual machine";
             checkBoxStartVM.UseVisualStyleBackColor = false;
+
             // 
             // buttonFinish
             // 
@@ -2461,6 +2666,7 @@ namespace VMware_VM_Generator
             buttonFinish.TabIndex = 6;
             buttonFinish.Text = "Finish";
             buttonFinish.UseVisualStyleBackColor = true;
+
             // 
             // labelFinishText
             // 
@@ -2470,6 +2676,7 @@ namespace VMware_VM_Generator
             labelFinishText.Size = new Size(385, 43);
             labelFinishText.TabIndex = 8;
             labelFinishText.Text = "You have successfully completed the VMware VM Generator wizard for {osName}.";
+
             // 
             // labelFinishTitle
             // 
@@ -2480,6 +2687,7 @@ namespace VMware_VM_Generator
             labelFinishTitle.Size = new Size(464, 82);
             labelFinishTitle.TabIndex = 9;
             labelFinishTitle.Text = "Completing the VMware VM Generator wizard of {osName}.";
+
             // 
             // pictureBoxFinishTop
             // 
@@ -2488,6 +2696,7 @@ namespace VMware_VM_Generator
             pictureBoxFinishTop.Size = new Size(707, 85);
             pictureBoxFinishTop.TabIndex = 4;
             pictureBoxFinishTop.TabStop = false;
+
             // 
             // pictureBoxFinishBottom
             // 
@@ -2496,6 +2705,7 @@ namespace VMware_VM_Generator
             pictureBoxFinishBottom.Size = new Size(707, 59);
             pictureBoxFinishBottom.TabIndex = 4;
             pictureBoxFinishBottom.TabStop = false;
+
             // 
             // pictureBoxFinishLeft
             // 
@@ -2504,6 +2714,7 @@ namespace VMware_VM_Generator
             pictureBoxFinishLeft.Size = new Size(118, 369);
             pictureBoxFinishLeft.TabIndex = 5;
             pictureBoxFinishLeft.TabStop = false;
+
             // 
             // pictureBoxFinishBackground
             // 
@@ -2512,6 +2723,7 @@ namespace VMware_VM_Generator
             pictureBoxFinishBackground.Size = new Size(589, 369);
             pictureBoxFinishBackground.TabIndex = 5;
             pictureBoxFinishBackground.TabStop = false;
+
             // 
             // panelFinishLeft
             // 
@@ -2519,6 +2731,7 @@ namespace VMware_VM_Generator
             panelFinishLeft.Name = "panelFinishLeft";
             panelFinishLeft.Size = new Size(118, 369);
             panelFinishLeft.TabIndex = 6;
+
             // 
             // panelFinishTop
             // 
@@ -2526,6 +2739,7 @@ namespace VMware_VM_Generator
             panelFinishTop.Name = "panelFinishTop";
             panelFinishTop.Size = new Size(707, 85);
             panelFinishTop.TabIndex = 6;
+
             // 
             // pictureBoxFinishTopRight
             // 
@@ -2536,6 +2750,7 @@ namespace VMware_VM_Generator
             pictureBoxFinishTopRight.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxFinishTopRight.TabIndex = 4;
             pictureBoxFinishTopRight.TabStop = false;
+
             // 
             // panelFinishBottom
             // 
@@ -2543,6 +2758,7 @@ namespace VMware_VM_Generator
             panelFinishBottom.Name = "panelFinishBottom";
             panelFinishBottom.Size = new Size(707, 59);
             panelFinishBottom.TabIndex = 6;
+
             // 
             // panelFinishBackground
             // 
@@ -2551,6 +2767,7 @@ namespace VMware_VM_Generator
             panelFinishBackground.Name = "panelFinishBackground";
             panelFinishBackground.Size = new Size(589, 369);
             panelFinishBackground.TabIndex = 6;
+
             // 
             // iconFinish
             // 
@@ -2559,16 +2776,17 @@ namespace VMware_VM_Generator
             iconFinish.Size = new Size(32, 32);
             iconFinish.TabIndex = 0;
             iconFinish.TabStop = false;
+
             // 
             // Form1
             // 
             ClientSize = new Size(707, 513);
+            Controls.Add(panelStep3);
             Controls.Add(panelStep6);
             Controls.Add(panelStep1);
             Controls.Add(panelStep7);
             Controls.Add(panelStep4);
             Controls.Add(panelStep5);
-            Controls.Add(panelStep3);
             Controls.Add(panelStep2);
             Controls.Add(panelWelcome);
             Controls.Add(panelFinish);
@@ -2579,6 +2797,7 @@ namespace VMware_VM_Generator
             StartPosition = FormStartPosition.CenterScreen;
             Text = "VMware {osName} VM Generator";
             Load += Form1_Load;
+
             ((System.ComponentModel.ISupportInitialize)numericUpDownFloppyCount).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownCDIDECount).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownCDSCSICount).EndInit();
@@ -2679,7 +2898,7 @@ namespace VMware_VM_Generator
 
         #endregion
 
-        // Panels and basic controls
+        // Declare controls only once to prevent duplicate definition errors
         private Panel panelWelcome;
         private CustomButton btnWelcomeBack;
         private CustomButton btnWelcomeNext;
@@ -2772,10 +2991,7 @@ namespace VMware_VM_Generator
         private GroupBox groupBoxSoundCard;
         private GroupBox groupBoxSCSIIO;
         private GroupBox groupBoxNetwork;
-        private RadioButton radioButtonBridged;
-        private RadioButton radioButtonNAT;
-        private RadioButton radioButtonNoNetwork;
-        private RadioButton radioButtonHostOnly;
+        private RadioButton radioButtonPCNet32;
         private ToolTip toolTip1;
         private RadioButton radioBusLogic;
         private RadioButton radioParavirtualizedSCSI;
@@ -2821,56 +3037,16 @@ namespace VMware_VM_Generator
 
         // Background PictureBoxes
         private PictureBox pictureBoxWelcomeTopRight;
+        private PictureBox pictureBoxStep1TopRight, pictureBoxStep1Top, pictureBoxStep1Bottom, pictureBoxStep1Left, pictureBoxStep1Background;
+        private PictureBox pictureBoxStep2TopRight, pictureBoxStep2Top, pictureBoxStep2Bottom, pictureBoxStep2Left, pictureBoxStep2Background;
+        private PictureBox pictureBoxStep3TopRight, pictureBoxStep3Top, pictureBoxStep3Bottom, pictureBoxStep3Left, pictureBoxStep3Background;
+        private PictureBox pictureBoxStep4TopRight, pictureBoxStep4Top, pictureBoxStep4Bottom, pictureBoxStep4Left, pictureBoxStep4Background;
+        private PictureBox pictureBoxStep5TopRight, pictureBoxStep5Top, pictureBoxStep5Bottom, pictureBoxStep5Left, pictureBoxStep5Background;
+        private PictureBox pictureBoxStep6TopRight, pictureBoxStep6Top, pictureBoxStep6Bottom, pictureBoxStep6Left, pictureBoxStep6Background;
+        private PictureBox pictureBoxStep7TopRight, pictureBoxStep7Top, pictureBoxStep7Bottom, pictureBoxStep7Left, pictureBoxStep7Background;
+        private PictureBox pictureBoxFinishTopRight, pictureBoxFinishTop, pictureBoxFinishBottom, pictureBoxFinishLeft, pictureBoxFinishBackground;
 
-        private PictureBox pictureBoxStep1TopRight;
-        private PictureBox pictureBoxStep1Top;
-        private PictureBox pictureBoxStep1Bottom;
-        private PictureBox pictureBoxStep1Left;
-        private PictureBox pictureBoxStep1Background;
-
-        private PictureBox pictureBoxStep2TopRight;
-        private PictureBox pictureBoxStep2Top;
-        private PictureBox pictureBoxStep2Bottom;
-        private PictureBox pictureBoxStep2Left;
-        private PictureBox pictureBoxStep2Background;
-
-        private PictureBox pictureBoxStep3TopRight;
-        private PictureBox pictureBoxStep3Top;
-        private PictureBox pictureBoxStep3Bottom;
-        private PictureBox pictureBoxStep3Left;
-        private PictureBox pictureBoxStep3Background;
-
-        private PictureBox pictureBoxStep4TopRight;
-        private PictureBox pictureBoxStep4Top;
-        private PictureBox pictureBoxStep4Bottom;
-        private PictureBox pictureBoxStep4Left;
-        private PictureBox pictureBoxStep4Background;
-
-        private PictureBox pictureBoxStep5TopRight;
-        private PictureBox pictureBoxStep5Top;
-        private PictureBox pictureBoxStep5Bottom;
-        private PictureBox pictureBoxStep5Left;
-        private PictureBox pictureBoxStep5Background;
-
-        private PictureBox pictureBoxStep6TopRight;
-        private PictureBox pictureBoxStep6Top;
-        private PictureBox pictureBoxStep6Bottom;
-        private PictureBox pictureBoxStep6Left;
-        private PictureBox pictureBoxStep6Background;
-
-        private PictureBox pictureBoxStep7TopRight;
-        private PictureBox pictureBoxStep7Top;
-        private PictureBox pictureBoxStep7Bottom;
-        private PictureBox pictureBoxStep7Left;
-        private PictureBox pictureBoxStep7Background;
-
-        private PictureBox pictureBoxFinishTopRight;
-        private PictureBox pictureBoxFinishTop;
-        private PictureBox pictureBoxFinishBottom;
-        private PictureBox pictureBoxFinishLeft;
-        private PictureBox pictureBoxFinishBackground;
-
-        // Layout Panels matching PictureBox names per step
+        // Layout Panels
         private Panel panelWelcomeBackground, panelWelcomeLeft, panelWelcomeTop, panelWelcomeBottom;
         private Panel panelStep1Background, panelStep1Left, panelStep1Top, panelStep1Bottom;
         private Panel panelStep2Background, panelStep2Left, panelStep2Top, panelStep2Bottom;
@@ -2880,6 +3056,7 @@ namespace VMware_VM_Generator
         private Panel panelStep6Background, panelStep6Left, panelStep6Top, panelStep6Bottom;
         private Panel panelStep7Background, panelStep7Left, panelStep7Top, panelStep7Bottom;
         private Panel panelFinishBackground, panelFinishLeft, panelFinishTop, panelFinishBottom;
+
         private Label SummaryTitleTemplate;
         private PictureBox iconWelcome;
         private PictureBox iconFinish;
@@ -2895,5 +3072,8 @@ namespace VMware_VM_Generator
         private PictureBox iconCDSATA;
         private PictureBox iconHardDrive;
         private PictureBox iconFolder;
+        private RadioButton radioButtonE1000PCI;
+        private RadioButton radioButtonE1000PCIe;
+        private RadioButton radioButtonVMXNET3;
     }
 }
