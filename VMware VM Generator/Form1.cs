@@ -244,17 +244,15 @@ namespace VMware_VM_Generator
 
                     string vmxFilePath = Path.Combine(vmFolder, vmName + ".vmx");
 
-                    string networkSelection = "nat";
-                    if (radioButtonBridged.Checked) networkSelection = "bridged";
-                    else if (radioButtonHostOnly.Checked) networkSelection = "hostonly";
-                    else if (radioButtonNoNetwork.Checked) networkSelection = "none";
+                    string networkSelection = "e1000e";
+                    if (radioButtonPCNet32.Checked) networkSelection = "vlance";
+                    else if (radioButtonVMXNET3.Checked) networkSelection = "vmxnet3";
+                    else if (radioButtonE1000PCI.Checked) networkSelection = "e1000";
+                    else if (radioButtonE1000PCIe.Checked) networkSelection = "e1000e";
 
                     // Read hardware version from the INI file (Hardware Version section), fallback to "19" if empty
                     string hwVersionIni = ini.Read("HardwareVersion", "Hardware Version");
                     if (string.IsNullOrWhiteSpace(hwVersionIni)) hwVersionIni = "19";
-
-                    // Read network adapter type from INI file if explicitly defined
-                    string iniEthernetDev = ini.Read("ethernet0.virtualDev", "Network");
 
                     // Read OS-Type from settings.ini [General] section, fallback to "other-64" if empty
                     string osTypeIni = ini.Read("OS-Type", "General");
@@ -308,7 +306,7 @@ namespace VMware_VM_Generator
                         CoresPerSocket = coresPerProcessor,
 
                         Firmware = uefi.Checked ? "efi" : "bios",
-                        NetworkType = networkSelection,
+                        NetworkType = "nat", // Standard network connection mode
 
                         SoundVirtualDev = radioButtonSB16.Checked ? "sb16" :
                             radioButtonES1371.Checked ? "es1371" :
@@ -333,7 +331,7 @@ namespace VMware_VM_Generator
 
                         IconPath = "",
                         HardwareVersion = hwVersionIni,
-                        EthernetVirtualDev = iniEthernetDev,
+                        EthernetVirtualDev = networkSelection,
                         GuestOs = osTypeIni
                     };
 
@@ -1557,28 +1555,47 @@ namespace VMware_VM_Generator
             ShowStep(0);
             trackBarMemory.TickStyle = TickStyle.None;
 
-            radioButtonNAT.Checked = true;
-            radioButtonBridged.Checked = false;
-            radioButtonHostOnly.Checked = false;
-            radioButtonNoNetwork.Checked = false;
 
-            string netDefault = ini.Read("Default", "Network");
+            // --- אתחול כרטיסי רשת מתוך settings.ini עם תמיכה ב־(מומלץ)/(לא נתמך) ---
+            string networkDefault = ini.Read("DefaultNetwork", "Network").ToLower();
 
-            switch (netDefault.ToUpper())
-            {
-                case "BRIDGED":
-                    radioButtonBridged.Checked = true;
-                    break;
-                case "HOSTONLY":
-                    radioButtonHostOnly.Checked = true;
-                    break;
-                case "NONE":
-                    radioButtonNoNetwork.Checked = true;
-                    break;
-                default:
-                    radioButtonNAT.Checked = true;
-                    break;
-            }
+            string pcnet32Enabled = ini.Read("PCNet32", "Network");
+            string vmxnet3Enabled = ini.Read("VMXNET3", "Network");
+            string e1000pciEnabled = ini.Read("E1000PCI", "Network");
+            string e1000pcieEnabled = ini.Read("E1000PCIe", "Network");
+
+            radioButtonPCNet32.Enabled = !pcnet32Enabled.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                                        !pcnet32Enabled.Equals("disabled", StringComparison.OrdinalIgnoreCase);
+
+            radioButtonVMXNET3.Enabled = !vmxnet3Enabled.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                                         !vmxnet3Enabled.Equals("disabled", StringComparison.OrdinalIgnoreCase);
+
+            radioButtonE1000PCI.Enabled = !e1000pciEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                                          !e1000pciEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase);
+
+            radioButtonE1000PCIe.Enabled = !e1000pcieEnabled.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                                           !e1000pcieEnabled.Equals("disabled", StringComparison.OrdinalIgnoreCase);
+
+            radioButtonPCNet32.Checked = false;
+            radioButtonVMXNET3.Checked = false;
+            radioButtonE1000PCI.Checked = false;
+            radioButtonE1000PCIe.Checked = false;
+
+            if (networkDefault == "pcnet32" && radioButtonPCNet32.Enabled)
+                radioButtonPCNet32.Checked = true;
+            else if (networkDefault == "vmxnet3" && radioButtonVMXNET3.Enabled)
+                radioButtonVMXNET3.Checked = true;
+            else if ((networkDefault == "e1000" || networkDefault == "e1000pci") && radioButtonE1000PCI.Enabled)
+                radioButtonE1000PCI.Checked = true;
+            else if (radioButtonE1000PCIe.Enabled)
+                radioButtonE1000PCIe.Checked = true;
+            else
+                radioButtonE1000PCIe.Checked = true;
+
+            if (!radioButtonPCNet32.Enabled) radioButtonPCNet32.Tag = localizedNotSupported;
+            if (!radioButtonVMXNET3.Enabled) radioButtonVMXNET3.Tag = localizedNotSupported;
+            if (!radioButtonE1000PCI.Enabled) radioButtonE1000PCI.Tag = localizedNotSupported;
+            if (!radioButtonE1000PCIe.Enabled) radioButtonE1000PCIe.Tag = localizedNotSupported;
 
             string scsiDefault = ini.Read("SCSI I/O Controller", "SCSI I/O Controller").ToUpper();
 
@@ -1645,7 +1662,8 @@ namespace VMware_VM_Generator
                     break;
             }
 
-            string soundDefault = ini.Read("Default", "Sound Card").ToLower();
+            // --- עדכון למפתח DefaultSoundCard ---
+            string soundDefault = ini.Read("DefaultSoundCard", "Sound Card").ToLower();
 
             string sb16Enabled = ini.Read("SB16", "Sound Card");
             string es1371Enabled = ini.Read("ES1371", "Sound Card");
@@ -1676,7 +1694,8 @@ namespace VMware_VM_Generator
             if (!radioButtonHDAudio.Enabled)
                 radioButtonHDAudio.Tag = localizedNotSupported;
 
-            string driveDefault = ini.Read("DefaultType", "Virtual Drive").ToLower();
+            // --- עדכון למפתח DefaultDriveType ---
+            string driveDefault = ini.Read("DefaultDriveType", "Virtual Drive").ToLower();
 
             string ideEnabled = ini.Read("IDE", "Virtual Drive");
             string scsiEnabled = ini.Read("SCSI", "Virtual Drive");
@@ -1878,6 +1897,15 @@ namespace VMware_VM_Generator
                 radioLSILogicSAS.Tag = localizedRecommended;
             else if (radioParavirtualizedSCSI.Enabled && radioParavirtualizedSCSI.Checked)
                 radioParavirtualizedSCSI.Tag = localizedRecommended;
+
+            if (radioButtonPCNet32.Enabled && radioButtonPCNet32.Checked)
+                radioButtonPCNet32.Tag = localizedRecommended;
+            else if (radioButtonVMXNET3.Enabled && radioButtonVMXNET3.Checked)
+                radioButtonVMXNET3.Tag = localizedRecommended;
+            else if (radioButtonE1000PCI.Enabled && radioButtonE1000PCI.Checked)
+                radioButtonE1000PCI.Tag = localizedRecommended;
+            else if (radioButtonE1000PCIe.Enabled && radioButtonE1000PCIe.Checked)
+                radioButtonE1000PCIe.Tag = localizedRecommended;
         }
 
         private string FormatMB(int mb)
@@ -2579,6 +2607,10 @@ namespace VMware_VM_Generator
             AppendSuffixLabelForControlByName("radioButtonSCSI", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioButtonSATA", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioButtonNVMe", localizedNotSupported, localizedRecommended);
+            AppendSuffixLabelForControlByName("radioButtonPCNet32", localizedNotSupported, localizedRecommended);
+            AppendSuffixLabelForControlByName("radioButtonVMXNET3", localizedNotSupported, localizedRecommended);
+            AppendSuffixLabelForControlByName("radioButtonE1000PCI", localizedNotSupported, localizedRecommended);
+            AppendSuffixLabelForControlByName("radioButtonE1000PCIe", localizedNotSupported, localizedRecommended);
 
             foreach (Control ctrl in this.Controls.Find("*_SuffixLabel", true))
             {
@@ -2864,10 +2896,7 @@ namespace VMware_VM_Generator
 
             string firmware = bios.Checked ? GetTr("SumBIOS", "BIOS") : GetTr("SumUEFI", "UEFI");
 
-            string netKey = radioButtonBridged.Checked ? "SumNetBridged" :
-                    radioButtonHostOnly.Checked ? "SumNetHostOnly" :
-                    radioButtonNoNetwork.Checked ? "SumNetNone" : "SumNetNAT";
-            string networkType = GetTr(netKey, "NAT");
+
 
             string soundKey = radioButtonHDAudio.Enabled && radioButtonHDAudio.Checked ? "SumSoundHDAudio" :
                      radioButtonSB16.Enabled && radioButtonSB16.Checked ? "SumSoundSB16" :
@@ -2932,7 +2961,6 @@ namespace VMware_VM_Generator
               $"• {lblCoresPerProcessor} {cores}\r\n" +
               $"• {lblMemory} {memoryStr}\r\n\r\n" +
               $"{sectionPeripherals}\r\n" +
-              $"• {lblNetwork} {networkType}\r\n" +
               $"• {lblSound} {soundCard}\r\n" +
               $"• {lblSCSI} {scsiController}\r\n\r\n" +
               $"{sectionDisk}\r\n" +
