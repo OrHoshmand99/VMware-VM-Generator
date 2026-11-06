@@ -25,10 +25,10 @@ namespace VMware_VM_Generator
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             toolTip1 = new ToolTip(components);
-            this.radioButtonE1000PCI = new RadioButton();
-            this.radioButtonE1000PCIe = new RadioButton();
+            radioButtonE1000PCI = new RadioButton();
+            radioButtonE1000PCIe = new RadioButton();
             radioButtonPCNet32 = new RadioButton();
-            this.radioButtonVMXNET3 = new RadioButton();
+            radioButtonVMXNET3 = new RadioButton();
             numericUpDownFloppyCount = new NumericUpDown();
             numericUpDownCDIDECount = new NumericUpDown();
             numericUpDownCDSCSICount = new NumericUpDown();
@@ -191,6 +191,7 @@ namespace VMware_VM_Generator
             groupBoxShortcutType = new GroupBox();
             radioShortcutDirect = new RadioButton();
             radioShortcutKvm = new RadioButton();
+            radioShortcutPlayer = new RadioButton();
             radioShortcutWorkstation = new RadioButton();
             checkBoxStartMenu = new CheckBox();
             checkBoxFullScreen = new CheckBox();
@@ -333,24 +334,24 @@ namespace VMware_VM_Generator
             // 
             // radioButtonE1000PCI
             // 
-            this.radioButtonE1000PCI.Location = new Point(15, 25);
-            this.radioButtonE1000PCI.Name = "radioButtonE1000PCI";
-            this.radioButtonE1000PCI.Size = new Size(129, 24);
-            this.radioButtonE1000PCI.TabIndex = 0;
-            this.radioButtonE1000PCI.TabStop = true;
-            this.radioButtonE1000PCI.Text = "Intel PRO/1000 PCI";
-            this.radioButtonE1000PCI.UseVisualStyleBackColor = false;
+            radioButtonE1000PCI.Location = new Point(15, 25);
+            radioButtonE1000PCI.Name = "radioButtonE1000PCI";
+            radioButtonE1000PCI.Size = new Size(129, 24);
+            radioButtonE1000PCI.TabIndex = 0;
+            radioButtonE1000PCI.TabStop = true;
+            radioButtonE1000PCI.Text = "Intel PRO/1000 PCI";
+            radioButtonE1000PCI.UseVisualStyleBackColor = false;
 
             // 
             // radioButtonE1000PCIe
             // 
-            this.radioButtonE1000PCIe.Location = new Point(247, 25);
-            this.radioButtonE1000PCIe.Name = "radioButtonE1000PCIe";
-            this.radioButtonE1000PCIe.Size = new Size(139, 24);
-            this.radioButtonE1000PCIe.TabIndex = 0;
-            this.radioButtonE1000PCIe.TabStop = true;
-            this.radioButtonE1000PCIe.Text = "Intel PRO/1000 PCIe";
-            this.radioButtonE1000PCIe.UseVisualStyleBackColor = false;
+            radioButtonE1000PCIe.Location = new Point(247, 25);
+            radioButtonE1000PCIe.Name = "radioButtonE1000PCIe";
+            radioButtonE1000PCIe.Size = new Size(139, 24);
+            radioButtonE1000PCIe.TabIndex = 0;
+            radioButtonE1000PCIe.TabStop = true;
+            radioButtonE1000PCIe.Text = "Intel PRO/1000 PCIe";
+            radioButtonE1000PCIe.UseVisualStyleBackColor = false;
 
             // 
             // radioButtonPCNet32
@@ -366,13 +367,13 @@ namespace VMware_VM_Generator
             // 
             // radioButtonVMXNET3
             // 
-            this.radioButtonVMXNET3.Location = new Point(247, 52);
-            this.radioButtonVMXNET3.Name = "radioButtonVMXNET3";
-            this.radioButtonVMXNET3.Size = new Size(129, 24);
-            this.radioButtonVMXNET3.TabIndex = 0;
-            this.radioButtonVMXNET3.TabStop = true;
-            this.radioButtonVMXNET3.Text = "VMware VMXNET3";
-            this.radioButtonVMXNET3.UseVisualStyleBackColor = false;
+            radioButtonVMXNET3.Location = new Point(247, 52);
+            radioButtonVMXNET3.Name = "radioButtonVMXNET3";
+            radioButtonVMXNET3.Size = new Size(129, 24);
+            radioButtonVMXNET3.TabIndex = 0;
+            radioButtonVMXNET3.TabStop = true;
+            radioButtonVMXNET3.Text = "VMware VMXNET3";
+            radioButtonVMXNET3.UseVisualStyleBackColor = false;
 
             // 
             // numericUpDownFloppyCount
@@ -1389,10 +1390,10 @@ namespace VMware_VM_Generator
             // groupBoxNetwork
             // 
             groupBoxNetwork.Controls.Add(iconNetwork);
-            groupBoxNetwork.Controls.Add(this.radioButtonVMXNET3);
+            groupBoxNetwork.Controls.Add(radioButtonVMXNET3);
             groupBoxNetwork.Controls.Add(radioButtonPCNet32);
-            groupBoxNetwork.Controls.Add(this.radioButtonE1000PCIe);
-            groupBoxNetwork.Controls.Add(this.radioButtonE1000PCI);
+            groupBoxNetwork.Controls.Add(radioButtonE1000PCIe);
+            groupBoxNetwork.Controls.Add(radioButtonE1000PCI);
             groupBoxNetwork.Location = new Point(124, 349);
             groupBoxNetwork.Name = "groupBoxNetwork";
             groupBoxNetwork.Size = new Size(571, 89);
@@ -2170,10 +2171,11 @@ namespace VMware_VM_Generator
             groupBoxShortcutType.BackColor = Color.Transparent;
             groupBoxShortcutType.Controls.Add(radioShortcutDirect);
             groupBoxShortcutType.Controls.Add(radioShortcutKvm);
+            groupBoxShortcutType.Controls.Add(radioShortcutPlayer);
             groupBoxShortcutType.Controls.Add(radioShortcutWorkstation);
             groupBoxShortcutType.Location = new Point(150, 195);
             groupBoxShortcutType.Name = "groupBoxShortcutType";
-            groupBoxShortcutType.Size = new Size(390, 95);
+            groupBoxShortcutType.Size = new Size(390, 110);
             groupBoxShortcutType.TabIndex = 13;
             groupBoxShortcutType.TabStop = false;
             groupBoxShortcutType.Text = "Shortcut Type";
@@ -2182,10 +2184,12 @@ namespace VMware_VM_Generator
             // radioShortcutDirect
             // 
             radioShortcutDirect.AutoSize = true;
+            radioShortcutDirect.Checked = true;
             radioShortcutDirect.Location = new Point(15, 20);
             radioShortcutDirect.Name = "radioShortcutDirect";
             radioShortcutDirect.Size = new Size(150, 19);
             radioShortcutDirect.TabIndex = 0;
+            radioShortcutDirect.TabStop = true;
             radioShortcutDirect.Text = "Direct VMX file shortcut";
             radioShortcutDirect.UseVisualStyleBackColor = true;
 
@@ -2193,7 +2197,7 @@ namespace VMware_VM_Generator
             // radioShortcutKvm
             // 
             radioShortcutKvm.AutoSize = true;
-            radioShortcutKvm.Location = new Point(15, 43);
+            radioShortcutKvm.Location = new Point(15, 41);
             radioShortcutKvm.Name = "radioShortcutKvm";
             radioShortcutKvm.Size = new Size(97, 19);
             radioShortcutKvm.TabIndex = 1;
@@ -2201,16 +2205,26 @@ namespace VMware_VM_Generator
             radioShortcutKvm.UseVisualStyleBackColor = true;
 
             // 
+            // radioShortcutPlayer
+            // 
+            radioShortcutPlayer.AutoSize = true;
+            radioShortcutPlayer.Location = new Point(15, 62);
+            radioShortcutPlayer.Name = "radioShortcutPlayer";
+            radioShortcutPlayer.Size = new Size(150, 19);
+            radioShortcutPlayer.TabIndex = 2;
+            radioShortcutPlayer.Text = "VMware Player shortcut";
+            radioShortcutPlayer.UseVisualStyleBackColor = true;
+
+            // 
             // radioShortcutWorkstation
             // 
             radioShortcutWorkstation.AutoSize = true;
-            radioShortcutWorkstation.Checked = true;
-            radioShortcutWorkstation.Location = new Point(15, 66);
+            radioShortcutWorkstation.Location = new Point(15, 83);
             radioShortcutWorkstation.Name = "radioShortcutWorkstation";
-            radioShortcutWorkstation.Size = new Size(181, 19);
-            radioShortcutWorkstation.TabIndex = 2;
-            radioShortcutWorkstation.TabStop = true;
-            radioShortcutWorkstation.Text = "Custom Workstation shortcut";
+            radioShortcutWorkstation.Size = new Size(202, 19);
+            radioShortcutWorkstation.TabIndex = 3;
+            radioShortcutWorkstation.TabStop = false;
+            radioShortcutWorkstation.Text = "Custom Workstation Pro shortcut";
             radioShortcutWorkstation.UseVisualStyleBackColor = true;
 
             // 
@@ -2219,7 +2233,7 @@ namespace VMware_VM_Generator
             checkBoxStartMenu.AutoSize = true;
             checkBoxStartMenu.Checked = true;
             checkBoxStartMenu.CheckState = CheckState.Checked;
-            checkBoxStartMenu.Location = new Point(371, 422);
+            checkBoxStartMenu.Location = new Point(371, 416);
             checkBoxStartMenu.Name = "checkBoxStartMenu";
             checkBoxStartMenu.Size = new Size(155, 19);
             checkBoxStartMenu.TabIndex = 10;
@@ -2230,7 +2244,8 @@ namespace VMware_VM_Generator
             // checkBoxFullScreen
             // 
             checkBoxFullScreen.AutoSize = true;
-            checkBoxFullScreen.Location = new Point(222, 349);
+            checkBoxFullScreen.Enabled = false;
+            checkBoxFullScreen.Location = new Point(222, 362);
             checkBoxFullScreen.Name = "checkBoxFullScreen";
             checkBoxFullScreen.Size = new Size(82, 19);
             checkBoxFullScreen.TabIndex = 10;
@@ -2241,7 +2256,8 @@ namespace VMware_VM_Generator
             // checkBoxClose
             // 
             checkBoxClose.AutoSize = true;
-            checkBoxClose.Location = new Point(202, 374);
+            checkBoxClose.Enabled = false;
+            checkBoxClose.Location = new Point(202, 387);
             checkBoxClose.Name = "checkBoxClose";
             checkBoxClose.Size = new Size(211, 19);
             checkBoxClose.TabIndex = 10;
@@ -2252,9 +2268,10 @@ namespace VMware_VM_Generator
             // checkBoxShortStart
             // 
             checkBoxShortStart.AutoSize = true;
+            checkBoxShortStart.Enabled = false;
             checkBoxShortStart.Checked = true;
             checkBoxShortStart.CheckState = CheckState.Checked;
-            checkBoxShortStart.Location = new Point(202, 326);
+            checkBoxShortStart.Location = new Point(202, 339);
             checkBoxShortStart.Name = "checkBoxShortStart";
             checkBoxShortStart.Size = new Size(230, 19);
             checkBoxShortStart.TabIndex = 10;
@@ -2265,9 +2282,10 @@ namespace VMware_VM_Generator
             // checkBoxNewWindow
             // 
             checkBoxNewWindow.AutoSize = true;
+            checkBoxNewWindow.Enabled = false;
             checkBoxNewWindow.Checked = true;
             checkBoxNewWindow.CheckState = CheckState.Checked;
-            checkBoxNewWindow.Location = new Point(202, 301);
+            checkBoxNewWindow.Location = new Point(202, 314);
             checkBoxNewWindow.Name = "checkBoxNewWindow";
             checkBoxNewWindow.Size = new Size(185, 19);
             checkBoxNewWindow.TabIndex = 10;
@@ -2280,7 +2298,7 @@ namespace VMware_VM_Generator
             checkBoxDesktop.AutoSize = true;
             checkBoxDesktop.Checked = true;
             checkBoxDesktop.CheckState = CheckState.Checked;
-            checkBoxDesktop.Location = new Point(170, 422);
+            checkBoxDesktop.Location = new Point(170, 416);
             checkBoxDesktop.Name = "checkBoxDesktop";
             checkBoxDesktop.Size = new Size(140, 19);
             checkBoxDesktop.TabIndex = 10;
@@ -2781,8 +2799,8 @@ namespace VMware_VM_Generator
             // Form1
             // 
             ClientSize = new Size(707, 513);
-            Controls.Add(panelStep3);
             Controls.Add(panelStep6);
+            Controls.Add(panelStep3);
             Controls.Add(panelStep1);
             Controls.Add(panelStep7);
             Controls.Add(panelStep4);
@@ -2975,6 +2993,7 @@ namespace VMware_VM_Generator
         private GroupBox groupBoxShortcutType;
         private RadioButton radioShortcutDirect;
         private RadioButton radioShortcutKvm;
+        private RadioButton radioShortcutPlayer;
         private RadioButton radioShortcutWorkstation;
         private CheckBox checkBoxStartMenu;
         private CheckBox checkBoxDesktop;
