@@ -34,6 +34,7 @@ namespace VMware_VM_Generator
 
         // Localized suffix texts (fallback to English defaults)
         private string localizedNotSupported = "(Not supported)";
+        private string localizedNotAvailable = "(Not available)";
         private string localizedRecommended = "(Recommended)";
 
         // Safe RTL title bar fix: title bar RTL with right-aligned text
@@ -473,8 +474,21 @@ namespace VMware_VM_Generator
                         shortcutTarget = "kvm";
                         shortcutArguments = $"\"{vmxFilePath}\"";
                     }
+                    else if (radioShortcutPlayer != null && radioShortcutPlayer.Checked)
+                    {
+                        // Launch via VMware Player
+                        string vmplayerPath = Path.Combine(Path.GetDirectoryName(vmwarePath), "vmplayer.exe");
+                        shortcutTarget = File.Exists(vmplayerPath) ? vmplayerPath : vmwarePath;
+
+                        if (checkBoxFullScreen.Checked)
+                        {
+                            shortcutArguments += "-X "; // Fullscreen switch support in Player
+                        }
+                        shortcutArguments += $"\"{vmxFilePath}\"";
+                    }
                     else
                     {
+                        // Launch via VMware Workstation
                         shortcutTarget = vmwarePath;
                         if (checkBoxNewWindow.Checked) shortcutArguments += "-n ";
                         if (checkBoxShortStart.Checked)
@@ -599,21 +613,49 @@ namespace VMware_VM_Generator
 
             EventHandler updateWorkstationSwitches = (s, e) => {
                 bool isWorkstation = radioShortcutWorkstation.Checked;
+                bool isPlayer = (radioShortcutPlayer != null && radioShortcutPlayer.Checked);
+
+                // Enable/disable Workstation switches
                 checkBoxNewWindow.Enabled = isWorkstation;
                 checkBoxShortStart.Enabled = isWorkstation;
                 checkBoxFullScreen.Enabled = isWorkstation && checkBoxShortStart.Checked;
                 checkBoxClose.Enabled = isWorkstation;
+
+                // Specific behavior for VMware Player: Fullscreen enabled, others disabled
+                if (isPlayer)
+                {
+                    checkBoxFullScreen.Enabled = true;
+                    checkBoxNewWindow.Enabled = false;
+                    checkBoxShortStart.Enabled = false;
+                    checkBoxClose.Enabled = false;
+                }
+
+                // If Direct or KVM selected, disable all switches
+                if (!isWorkstation && !isPlayer)
+                {
+                    checkBoxNewWindow.Enabled = false;
+                    checkBoxShortStart.Enabled = false;
+                    checkBoxFullScreen.Enabled = false;
+                    checkBoxClose.Enabled = false;
+                }
             };
 
             radioShortcutDirect.CheckedChanged += updateWorkstationSwitches;
             radioShortcutKvm.CheckedChanged += updateWorkstationSwitches;
             radioShortcutWorkstation.CheckedChanged += updateWorkstationSwitches;
+            if (radioShortcutPlayer != null)
+            {
+                radioShortcutPlayer.CheckedChanged += updateWorkstationSwitches;
+            }
 
             checkBoxShortStart.CheckedChanged += (s, e) => {
-                checkBoxFullScreen.Enabled = radioShortcutWorkstation.Checked && checkBoxShortStart.Checked;
-                if (!checkBoxShortStart.Checked)
+                if (radioShortcutWorkstation.Checked)
                 {
-                    checkBoxFullScreen.Checked = false;
+                    checkBoxFullScreen.Enabled = radioShortcutWorkstation.Checked && checkBoxShortStart.Checked;
+                    if (!checkBoxShortStart.Checked)
+                    {
+                        checkBoxFullScreen.Checked = false;
+                    }
                 }
             };
 
@@ -1350,6 +1392,10 @@ namespace VMware_VM_Generator
                 if (!string.IsNullOrWhiteSpace(customNotSupported))
                     localizedNotSupported = customNotSupported;
 
+                string customNotAvailable = lang.Read("NotAvailableText", "Language");
+                if (!string.IsNullOrWhiteSpace(customNotAvailable))
+                    localizedNotAvailable = customNotAvailable;
+
                 string customRecommended = lang.Read("RecommendedText", "Language");
                 if (!string.IsNullOrWhiteSpace(customRecommended))
                     localizedRecommended = customRecommended;
@@ -1494,22 +1540,31 @@ namespace VMware_VM_Generator
             trackBarMemory.Value = MBToSlider(recommendedDefault);
             numericUpDownMemory.Value = recommendedDefault;
 
-            string fw = ini.Read("Firmware", "Firmware");
+            string fw = ini.Read("Firmware", "Firmware").Trim();
 
             bios.Text = "BIOS";
             uefi.Text = "UEFI";
 
-            if (fw.Equals("BIOS-F", StringComparison.OrdinalIgnoreCase))
+            // יישום הלוגיקה המדויקת: BIOS-f מבטל UEFI, ו-UEFI-f מבטל BIOS
+            if (fw.Equals("BIOS-f", StringComparison.OrdinalIgnoreCase))
             {
                 bios.Enabled = true;
+                bios.Tag = null;
+
                 uefi.Enabled = false;
+                uefi.Tag = localizedNotSupported;
+
                 bios.Checked = true;
                 uefi.Checked = false;
             }
-            else if (fw.Equals("UEFI-F", StringComparison.OrdinalIgnoreCase))
+            else if (fw.Equals("UEFI-f", StringComparison.OrdinalIgnoreCase))
             {
-                bios.Enabled = false;
                 uefi.Enabled = true;
+                uefi.Tag = null;
+
+                bios.Enabled = false;
+                bios.Tag = localizedNotSupported;
+
                 uefi.Checked = true;
                 bios.Checked = false;
             }
@@ -1517,6 +1572,8 @@ namespace VMware_VM_Generator
             {
                 bios.Enabled = true;
                 uefi.Enabled = true;
+                bios.Tag = null;
+                uefi.Tag = null;
                 bios.Checked = true;
                 uefi.Checked = false;
             }
@@ -1524,6 +1581,8 @@ namespace VMware_VM_Generator
             {
                 bios.Enabled = true;
                 uefi.Enabled = true;
+                bios.Tag = null;
+                uefi.Tag = null;
                 uefi.Checked = true;
                 bios.Checked = false;
             }
@@ -1531,6 +1590,8 @@ namespace VMware_VM_Generator
             {
                 bios.Enabled = true;
                 uefi.Enabled = true;
+                bios.Tag = null;
+                uefi.Tag = null;
                 bios.Checked = true;
                 uefi.Checked = false;
             }
@@ -1555,8 +1616,39 @@ namespace VMware_VM_Generator
             ShowStep(0);
             trackBarMemory.TickStyle = TickStyle.None;
 
+            // --- Validate VMware executables existence and assign (Not available) if missing ---
+            string vmwarePath = GetVmwarePath();
+            string vmwareDir = Path.GetDirectoryName(vmwarePath);
 
-            // --- אתחול כרטיסי רשת מתוך settings.ini עם תמיכה ב־(מומלץ)/(לא נתמך) ---
+            bool hasVmware = File.Exists(Path.Combine(vmwareDir, "vmware.exe"));
+            bool hasVmplayer = File.Exists(Path.Combine(vmwareDir, "vmplayer.exe"));
+            bool hasKvm = File.Exists(Path.Combine(vmwareDir, "vmware-kvm.exe"));
+
+            radioShortcutWorkstation.Enabled = hasVmware;
+            if (radioShortcutPlayer != null)
+            {
+                radioShortcutPlayer.Enabled = hasVmplayer;
+            }
+            radioShortcutKvm.Enabled = hasKvm;
+
+            // Executables missing from disk get (Not available)
+            if (!hasVmware) radioShortcutWorkstation.Tag = localizedNotAvailable;
+            if (radioShortcutPlayer != null && !hasVmplayer) radioShortcutPlayer.Tag = localizedNotAvailable;
+            if (!hasKvm) radioShortcutKvm.Tag = localizedNotAvailable;
+
+            // Fallback to radioShortcutDirect as default if specific shortcut executables are unavailable
+            if (!radioShortcutWorkstation.Enabled && (!radioShortcutPlayer?.Enabled ?? true) && !radioShortcutKvm.Enabled)
+            {
+                radioShortcutDirect.Checked = true;
+            }
+            else if (!radioShortcutWorkstation.Enabled && radioShortcutWorkstation.Checked)
+            {
+                if (radioShortcutKvm.Enabled) radioShortcutKvm.Checked = true;
+                else if (radioShortcutPlayer != null && radioShortcutPlayer.Enabled) radioShortcutPlayer.Checked = true;
+                else radioShortcutDirect.Checked = true;
+            }
+
+            // --- Network settings initialization (Using Not supported if disabled in INI) ---
             string networkDefault = ini.Read("DefaultNetwork", "Network").ToLower();
 
             string pcnet32Enabled = ini.Read("PCNet32", "Network");
@@ -1638,6 +1730,11 @@ namespace VMware_VM_Generator
             radioLSILogicSAS.Checked = false;
             radioParavirtualizedSCSI.Checked = false;
 
+            if (!radioBusLogic.Enabled) radioBusLogic.Tag = localizedNotSupported;
+            if (!radioLSILogic.Enabled) radioLSILogic.Tag = localizedNotSupported;
+            if (!radioLSILogicSAS.Enabled) radioLSILogicSAS.Tag = localizedNotSupported;
+            if (!radioParavirtualizedSCSI.Enabled) radioParavirtualizedSCSI.Tag = localizedNotSupported;
+
             switch (scsiDefault)
             {
                 case "BUSLOGIC":
@@ -1662,7 +1759,7 @@ namespace VMware_VM_Generator
                     break;
             }
 
-            // --- עדכון למפתח DefaultSoundCard ---
+            // --- Sound card settings initialization ---
             string soundDefault = ini.Read("DefaultSoundCard", "Sound Card").ToLower();
 
             string sb16Enabled = ini.Read("SB16", "Sound Card");
@@ -1694,7 +1791,7 @@ namespace VMware_VM_Generator
             if (!radioButtonHDAudio.Enabled)
                 radioButtonHDAudio.Tag = localizedNotSupported;
 
-            // --- עדכון למפתח DefaultDriveType ---
+            // --- Virtual drive settings initialization ---
             string driveDefault = ini.Read("DefaultDriveType", "Virtual Drive").ToLower();
 
             string ideEnabled = ini.Read("IDE", "Virtual Drive");
@@ -2135,60 +2232,60 @@ namespace VMware_VM_Generator
                         }
                     }
                     catch { }
-                }
 
-                MakeControlsTransparent(activePanel);
+                    MakeControlsTransparent(activePanel);
 
-                try
-                {
-                    var trPic = this.Controls.Find($"pictureBox{pagePrefix}TopRight", true).FirstOrDefault() as PictureBox;
-                    if (trPic != null)
+                    try
                     {
-                        trPic.Visible = true;
-                        trPic.BringToFront();
-                    }
-                }
-                catch { }
-
-                try
-                {
-                    var backgroundControl = this.Controls.Find($"pictureBox{pagePrefix}Background", true).FirstOrDefault() as Control
-                                         ?? this.Controls.Find($"panel{pagePrefix}Background", true).FirstOrDefault() as Control;
-                    if (backgroundControl != null)
-                    {
-                        void FixIcon(PictureBox icon)
+                        var trPic = this.Controls.Find($"pictureBox{pagePrefix}TopRight", true).FirstOrDefault() as PictureBox;
+                        if (trPic != null)
                         {
-                            if (icon == null) return;
-                            try
-                            {
-                                var screenPt = icon.Parent.PointToScreen(icon.Location);
-                                var newLoc = backgroundControl.PointToClient(screenPt);
-                                icon.Parent = backgroundControl;
-                                icon.Location = newLoc;
-                            }
-                            catch { icon.Parent = backgroundControl; }
-                            icon.Visible = true;
-                            icon.SizeMode = PictureBoxSizeMode.Zoom;
-                            icon.BackColor = Color.Transparent;
-                            icon.BringToFront();
+                            trPic.Visible = true;
+                            trPic.BringToFront();
                         }
-                        if (step == 0) FixIcon(iconWelcome);
-                        if (step == 1) FixIcon(iconFolder);
-                        if (step == 4) FixIcon(iconHardDrive);
-                        if (step == 8) FixIcon(iconFinish);
                     }
+                    catch { }
+
+                    try
+                    {
+                        var backgroundControl = this.Controls.Find($"pictureBox{pagePrefix}Background", true).FirstOrDefault() as Control
+                                                ?? this.Controls.Find($"panel{pagePrefix}Background", true).FirstOrDefault() as Control;
+                        if (backgroundControl != null)
+                        {
+                            void FixIcon(PictureBox icon)
+                            {
+                                if (icon == null) return;
+                                try
+                                {
+                                    var screenPt = icon.Parent.PointToScreen(icon.Location);
+                                    var newLoc = backgroundControl.PointToClient(screenPt);
+                                    icon.Parent = backgroundControl;
+                                    icon.Location = newLoc;
+                                }
+                                catch { icon.Parent = backgroundControl; }
+                                icon.Visible = true;
+                                icon.SizeMode = PictureBoxSizeMode.Zoom;
+                                icon.BackColor = Color.Transparent;
+                                icon.BringToFront();
+                            }
+                            if (step == 0) FixIcon(iconWelcome);
+                            if (step == 1) FixIcon(iconFolder);
+                            if (step == 4) FixIcon(iconHardDrive);
+                            if (step == 8) FixIcon(iconFinish);
+                        }
+                    }
+                    catch { }
+
+                    foreach (Control c in activePanel.Controls)
+                    {
+                        if (c is Label || c is CheckBox || c is RadioButton || c is GroupBox)
+                            c.BringToFront();
+                    }
+
+                    RefreshSuffixLabels();
+
+                    activePanel.Invalidate(true);
                 }
-                catch { }
-
-                foreach (Control c in activePanel.Controls)
-                {
-                    if (c is Label || c is CheckBox || c is RadioButton || c is GroupBox)
-                        c.BringToFront();
-                }
-
-                RefreshSuffixLabels();
-
-                activePanel.Invalidate(true);
             }
         }
 
@@ -2446,6 +2543,9 @@ namespace VMware_VM_Generator
             string customNotSupported = lang.Read("NotSupportedText", "Language");
             if (!string.IsNullOrWhiteSpace(customNotSupported)) localizedNotSupported = customNotSupported;
 
+            string customNotAvailable = lang.Read("NotAvailableText", "Language");
+            if (!string.IsNullOrWhiteSpace(customNotAvailable)) localizedNotAvailable = customNotAvailable;
+
             string customRecommended = lang.Read("RecommendedText", "Language");
             if (!string.IsNullOrWhiteSpace(customRecommended)) localizedRecommended = customRecommended;
 
@@ -2595,7 +2695,9 @@ namespace VMware_VM_Generator
                 }
             }
 
-            AppendSuffixLabels(this, localizedNotSupported, localizedRecommended);
+            // Hardware, Firmware and controller options suffix rendering
+            AppendSuffixLabelForControlByName("bios", localizedNotSupported, localizedRecommended);
+            AppendSuffixLabelForControlByName("uefi", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioBusLogic", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioLSILogic", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioLSILogicSAS", localizedNotSupported, localizedRecommended);
@@ -2612,6 +2714,14 @@ namespace VMware_VM_Generator
             AppendSuffixLabelForControlByName("radioButtonE1000PCI", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioButtonE1000PCIe", localizedNotSupported, localizedRecommended);
 
+            // Shortcut executables availability suffix rendering (showing Not Available when missing)
+            AppendSuffixLabelForControlByName("radioShortcutWorkstation", localizedNotAvailable, localizedRecommended);
+            if (radioShortcutPlayer != null)
+            {
+                AppendSuffixLabelForControlByName("radioShortcutPlayer", localizedNotAvailable, localizedRecommended);
+            }
+            AppendSuffixLabelForControlByName("radioShortcutKvm", localizedNotAvailable, localizedRecommended);
+
             foreach (Control ctrl in this.Controls.Find("*_SuffixLabel", true))
             {
                 ctrl.BringToFront();
@@ -2622,7 +2732,7 @@ namespace VMware_VM_Generator
             }
         }
 
-        private void AppendSuffixLabelForControlByName(string controlName, string notSupportedText, string recommendedText)
+        private void AppendSuffixLabelForControlByName(string controlName, string notAvailableText, string recommendedText)
         {
             var matches = this.Controls.Find(controlName, true);
             if (matches == null || matches.Length == 0) return;
@@ -2637,14 +2747,17 @@ namespace VMware_VM_Generator
                     isEffectivelyEnabled &= p.Enabled;
                 }
 
-                bool isNotSupported = !isEffectivelyEnabled;
+                bool isDisabled = !isEffectivelyEnabled;
                 string labelText = null;
 
-                if (isNotSupported)
+                if (isDisabled)
                 {
+                    bool isShortcutRadio = ctrl.Name.StartsWith("radioShortcut", StringComparison.OrdinalIgnoreCase);
+                    string defaultText = isShortcutRadio ? localizedNotAvailable : localizedNotSupported;
+
                     if (controlNotSupportedSuffix.TryGetValue(ctrl.Name, out var perCtrlNotSup) && !string.IsNullOrWhiteSpace(perCtrlNotSup))
                         labelText = perCtrlNotSup;
-                    else labelText = notSupportedText;
+                    else labelText = defaultText;
                 }
                 else
                 {
@@ -2672,7 +2785,7 @@ namespace VMware_VM_Generator
                     Text = labelText,
                     AutoSize = true,
                     Font = new Font(this.Font.FontFamily, 8, FontStyle.Italic),
-                    ForeColor = isNotSupported ? Color.Gray : Color.Green
+                    ForeColor = isDisabled ? Color.Gray : Color.Green
                 };
 
                 int margin = 6;
@@ -2719,107 +2832,6 @@ namespace VMware_VM_Generator
                 lbl.Location = new Point(preferredX, y);
                 lbl.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                 lbl.BringToFront();
-            }
-        }
-
-        private void AppendSuffixLabels(Control container, string notSupportedText, string recommendedText)
-        {
-            foreach (Control ctrl in container.Controls)
-            {
-                if (ctrl is Label && ctrl.Name.EndsWith("_SuffixLabel")) continue;
-
-                string labelText = null;
-                bool isEffectivelyEnabled = ctrl.Enabled;
-                for (Control p = ctrl.Parent; p != null; p = p.Parent)
-                {
-                    isEffectivelyEnabled &= p.Enabled;
-                }
-
-                bool isNotSupported = !isEffectivelyEnabled;
-
-                if (isNotSupported)
-                {
-                    if (controlNotSupportedSuffix.TryGetValue(ctrl.Name, out var perCtrlNotSup) && !string.IsNullOrWhiteSpace(perCtrlNotSup))
-                        labelText = perCtrlNotSup;
-                    else labelText = notSupportedText;
-                }
-                else
-                {
-                    if (controlRecommendedSuffix.TryGetValue(ctrl.Name, out var perCtrlRec) && !string.IsNullOrWhiteSpace(perCtrlRec))
-                        labelText = perCtrlRec;
-                    else if (ctrl.Tag is string t && !string.IsNullOrWhiteSpace(t))
-                        labelText = t;
-                }
-
-                if (!string.IsNullOrWhiteSpace(labelText))
-                {
-                    Control parent = ctrl.Parent ?? container;
-                    string labelName = ctrl.Name + "_SuffixLabel";
-
-                    var existingLabel = parent.Controls.OfType<Label>().FirstOrDefault(l => l.Name == labelName);
-                    if (existingLabel != null)
-                    {
-                        parent.Controls.Remove(existingLabel);
-                        existingLabel.Dispose();
-                    }
-
-                    Label lbl = new Label
-                    {
-                        Name = labelName,
-                        Text = labelText,
-                        AutoSize = true,
-                        Font = new Font(this.Font.FontFamily, 8, FontStyle.Italic),
-                        ForeColor = isNotSupported ? Color.Gray : Color.Green
-                    };
-
-                    int margin = 6;
-                    int preferredX, y;
-
-                    if (ctrl is RadioButton rb)
-                    {
-                        int radioBoxWidth = 20;
-
-                        if (rb.Height > 30)
-                        {
-                            y = rb.Top + rb.Height - 4;
-                            preferredX = rb.Left + radioBoxWidth;
-                        }
-                        else
-                        {
-                            Size textSize = TextRenderer.MeasureText(rb.Text, rb.Font);
-                            y = rb.Top + Math.Max(0, (rb.Height - lbl.PreferredHeight) / 2);
-
-                            if (this.RightToLeft == RightToLeft.Yes)
-                            {
-                                preferredX = rb.Left + rb.Width - radioBoxWidth - textSize.Width - lbl.PreferredWidth - margin;
-                            }
-                            else
-                            {
-                                preferredX = rb.Left + radioBoxWidth + textSize.Width + margin;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (this.RightToLeft == RightToLeft.Yes)
-                        {
-                            preferredX = ctrl.Left - lbl.PreferredWidth - margin;
-                        }
-                        else
-                        {
-                            preferredX = ctrl.Left + ctrl.Width + margin;
-                        }
-                        y = ctrl.Top + Math.Max(0, (ctrl.Height - lbl.PreferredHeight) / 2);
-                    }
-
-                    parent.Controls.Add(lbl);
-                    lbl.Location = new Point(preferredX, y);
-                    lbl.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-                    lbl.BringToFront();
-                }
-
-                if (ctrl.Controls.Count > 0)
-                    AppendSuffixLabels(ctrl, notSupportedText, recommendedText);
             }
         }
 
@@ -2895,8 +2907,6 @@ namespace VMware_VM_Generator
             string memoryStr = memoryMB < 1024 ? $"{memoryMB} MB" : $"{memoryMB / 1024} GB";
 
             string firmware = bios.Checked ? GetTr("SumBIOS", "BIOS") : GetTr("SumUEFI", "UEFI");
-
-
 
             string soundKey = radioButtonHDAudio.Enabled && radioButtonHDAudio.Checked ? "SumSoundHDAudio" :
                      radioButtonSB16.Enabled && radioButtonSB16.Checked ? "SumSoundSB16" :
