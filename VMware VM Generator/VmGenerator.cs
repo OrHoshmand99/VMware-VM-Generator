@@ -8,6 +8,12 @@ namespace VMware_VM_Generator
 {
     public static class VirtualMachineGenerator
     {
+        // Static constructor to register code pages provider for .NET Core / .NET 8 compatibility (CodePage 1255)
+        static VirtualMachineGenerator()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         public class VmConfig
         {
             public string VmName { get; set; }
@@ -56,8 +62,9 @@ namespace VMware_VM_Generator
         {
             StringBuilder sb = new StringBuilder();
 
-            // 1. Mandatory base configuration lines
-            sb.AppendLine(".encoding = \"UTF-8\"");
+            // 1. Mandatory base configuration lines with exact requested encoding headers
+            sb.AppendLine(".encoding = \"windows-1255\"");
+            sb.AppendLine("encoding = \"UTF-8\"");
             sb.AppendLine("config.version = \"8\"");
             sb.AppendLine("virtualHW.productCompatibility = \"hosted\"");
             sb.AppendLine("pciBridge0.present = \"TRUE\"");
@@ -82,7 +89,6 @@ namespace VMware_VM_Generator
             sb.AppendLine("sound.present = \"TRUE\"");
             sb.AppendLine("sound.fileName = \"-1\"");
             sb.AppendLine("sound.autodetect = \"TRUE\"");
-            sb.AppendLine("scsi0.present = \"TRUE\"");
             sb.AppendLine("ethernet0.present = \"TRUE\"");
             sb.AppendLine("ethernet0.startConnected = \"TRUE\"");
 
@@ -144,14 +150,14 @@ namespace VMware_VM_Generator
             {
                 sb.AppendLine("scsi0.present = \"TRUE\"");
                 sb.AppendLine("scsi0:0.present = \"TRUE\"");
-                sb.AppendLine("scsi0:0.deviceType = \"scsi-hardDisk\"");
+                sb.AppendLine("scsi0:0.deviceType = \"disk\"");
                 sb.AppendLine($"scsi0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
             }
             else if (primaryController == "sata")
             {
                 sb.AppendLine("sata0.present = \"TRUE\"");
                 sb.AppendLine("sata0:0.present = \"TRUE\"");
-                sb.AppendLine("sata0:0.deviceType = \"sata-hardDisk\"");
+                sb.AppendLine("sata0:0.deviceType = \"disk\"");
                 sb.AppendLine($"sata0:0.fileName = \"{Path.GetFileName(config.DiskPath)}\"");
             }
             else if (primaryController == "nvme")
@@ -286,7 +292,8 @@ namespace VMware_VM_Generator
                 sb.AppendLine($"gui.customizedIcon = \"{iconFileName}\"");
             }
 
-            File.WriteAllText(vmxFilePath, sb.ToString(), Encoding.UTF8);
+            // Write VMX file using Windows-1255 encoding with CodePagesEncodingProvider registered for .NET 8 support
+            File.WriteAllText(vmxFilePath, sb.ToString(), Encoding.GetEncoding(1255));
         }
 
         /// <summary>
@@ -320,7 +327,7 @@ namespace VMware_VM_Generator
         }
 
         /// <summary>
-        /// Automatically generates helper scripts inside the virtual machine folder to display the shortcut generator UI form, fully localized via INI language files with dynamic RTL and availability tagging.
+        /// Automatically generates helper scripts inside the virtual machine folder to display the shortcut generator UI form.
         /// </summary>
         public static void CreateShortcutUtilityScript(string vmFolder)
         {
@@ -329,7 +336,6 @@ namespace VMware_VM_Generator
                 string scriptPath = Path.Combine(vmFolder, "CreateShortcuts.bat");
                 string psScriptPath = Path.Combine(vmFolder, "CreateShortcuts.ps1");
 
-                // Read settings.ini and language file from the main application directory at build time
                 string appDir = AppDomain.CurrentDomain.BaseDirectory;
                 string iniPath = Path.Combine(appDir, "settings.ini");
                 string langFilePath = "";
@@ -372,11 +378,7 @@ namespace VMware_VM_Generator
                     return langDict.TryGetValue(key, out var val) ? val : def;
                 }
 
-                string direction = "LTR";
-                if (langDict.TryGetValue("Direction", out var dirVal))
-                {
-                    direction = dirVal;
-                }
+                string direction = langDict.TryGetValue("Direction", out var dirVal) ? dirVal : "LTR";
 
                 string wTitle = GetText("ShortcutWindowTitle", "Create Virtual Machine Shortcuts");
                 string sNameLbl = GetText("ShortcutNameLabel", "Shortcut name:");
@@ -450,7 +452,6 @@ namespace VMware_VM_Generator
                 sb.AppendLine("$form.MinimizeBox = $false");
                 sb.AppendLine("$form.StartPosition = 'CenterScreen'");
 
-                // Dynamic RTL and layout direction injection
                 sb.AppendLine($"$direction = '{direction}'");
                 sb.AppendLine("if ($direction -eq 'RTL') {");
                 sb.AppendLine("    $form.RightToLeft = [System.Windows.Forms.RightToLeft]::Yes");
@@ -476,7 +477,6 @@ namespace VMware_VM_Generator
                 sb.AppendLine("if ($direction -eq 'RTL') { $gb.RightToLeft = [System.Windows.Forms.RightToLeft]::Yes }");
                 sb.AppendLine("$form.Controls.Add($gb)");
 
-                // Default selection set to Direct VMX shortcut (rbDirect) with full RTL support
                 sb.AppendLine("$rbDirect = New-Object System.Windows.Forms.RadioButton");
                 sb.AppendLine("$rbDirect.Name = 'rbDirect'");
                 sb.AppendLine($"$rbDirect.Text = '{rbDirText.Replace("'", "''")}'");
@@ -587,7 +587,6 @@ namespace VMware_VM_Generator
                 sb.AppendLine("    }");
                 sb.AppendLine("}");
 
-                // Align radio buttons properly to the right side inside GroupBox when RTL is enabled
                 sb.AppendLine("$form.add_Shown({");
                 sb.AppendLine("    Refresh-SuffixLabels");
                 sb.AppendLine("    if ($direction -eq 'RTL') {");
@@ -690,7 +689,7 @@ namespace VMware_VM_Generator
 
                 sb.AppendLine("[void]$form.ShowDialog()");
 
-                File.WriteAllText(psScriptPath, sb.ToString(), new UTF8Encoding(true));
+                File.WriteAllText(psScriptPath, sb.ToString(), new UTF8Encoding(false));
 
                 string batContent = "@echo off\r\ncd /d \"%~dp0\"\r\npowershell -ExecutionPolicy Bypass -WindowStyle Hidden -File \"%~dp0CreateShortcuts.ps1\"";
                 File.WriteAllText(scriptPath, batContent, Encoding.Default);
@@ -759,9 +758,6 @@ namespace VMware_VM_Generator
             }
         }
 
-        /// <summary>
-        /// Unified method to generate VMX, virtual disk, and shortcut utility script.
-        /// </summary>
         public static void CreateVirtualMachine(string vmxFilePath, VmConfig config, string vmwareExePath)
         {
             CreateVmxFile(vmxFilePath, config);
@@ -778,9 +774,6 @@ namespace VMware_VM_Generator
             }
         }
 
-        /// <summary>
-        /// Backward compatibility method to generate VMX and shortcut utility script without disk creation.
-        /// </summary>
         public static void CreateVirtualMachine(string vmxFilePath, VmConfig config)
         {
             CreateVmxFile(vmxFilePath, config);
