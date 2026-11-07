@@ -1304,8 +1304,10 @@ namespace VMware_VM_Generator
             if (iconFolder != null) iconFolder.Image = GetResourceImage("iconFolder");
             if (iconHardDrive != null) iconHardDrive.Image = GetResourceImage("iconHardDrive");
             try { pictureBoxStep1Background.SendToBack(); } catch { }
+            try { pictureBoxStep3Background.SendToBack(); } catch { }
             try { pictureBoxStep4Background.SendToBack(); } catch { }
             try { panelStep1Background.BringToFront(); } catch { }
+            try { panelStep3Background.BringToFront(); } catch { }
             try { panelStep4Background.BringToFront(); } catch { }
             try { iconFolder?.BringToFront(); } catch { }
             try { iconHardDrive?.BringToFront(); } catch { }
@@ -1846,7 +1848,7 @@ namespace VMware_VM_Generator
             }
             else if (bootController == "SATA")
             {
-                if (sataCount == 0) sataCount = 1;
+                if (scsiCount == 0) scsiCount = 1;
                 numericUpDownCDSATACount.Minimum = 1;
             }
 
@@ -2159,11 +2161,11 @@ namespace VMware_VM_Generator
                             foreach (var c in children)
                             {
                                 if (c == backgroundControl) continue;
-                                if (c is PictureBox pbc && pbc.Name != "pictureVMIcon" && pbc.Name != "iconFloppy" && !pbc.Name.StartsWith("iconCD")) continue;
+                                if (c is PictureBox pbc && pbc.Name != "pictureVMIcon" && pbc.Name != "iconFloppy" && pbc.Name != "iconProcessor" && !pbc.Name.StartsWith("iconCD")) continue;
                                 if (c is Panel) continue;
 
                                 if (c is Label || c is CheckBox || c is RadioButton || c is GroupBox || c is TrackBar ||
-                                    (c is PictureBox && (c.Name == "pictureVMIcon" || c.Name == "iconFloppy" || c.Name.StartsWith("iconCD"))))
+                                    (c is PictureBox && (c.Name == "pictureVMIcon" || c.Name == "iconFloppy" || c.Name == "iconProcessor" || c.Name.StartsWith("iconCD"))))
                                 {
                                     try
                                     {
@@ -2181,7 +2183,7 @@ namespace VMware_VM_Generator
                                         {
                                             try { tb.BackColor = Color.Transparent; tb.TickStyle = TickStyle.None; } catch { }
                                         }
-                                        if (c is PictureBox pic && (pic.Name == "pictureVMIcon" || pic.Name == "iconFloppy" || pic.Name.StartsWith("iconCD")))
+                                        if (c is PictureBox pic && (pic.Name == "pictureVMIcon" || pic.Name == "iconFloppy" || pic.Name == "iconProcessor" || pic.Name.StartsWith("iconCD")))
                                         {
                                             try { pic.BackColor = Color.Transparent; pic.BringToFront(); } catch { }
                                         }
@@ -2231,6 +2233,7 @@ namespace VMware_VM_Generator
                             }
                             if (step == 0) FixIcon(iconWelcome);
                             if (step == 1) FixIcon(iconFolder);
+                            if (step == 3) FixIcon(iconProcessor);
                             if (step == 4) FixIcon(iconHardDrive);
                             if (step == 8) FixIcon(iconFinish);
                         }
@@ -2243,7 +2246,11 @@ namespace VMware_VM_Generator
                             c.BringToFront();
                     }
 
-                    if (step == 4)
+                    if (step == 3)
+                    {
+                        AlignStep3Labels();
+                    }
+                    else if (step == 4)
                     {
                         AlignStep4Labels();
                     }
@@ -2673,9 +2680,31 @@ namespace VMware_VM_Generator
                 }
             }
 
+            if (container == panelStep3 || container == this)
+            {
+                AlignStep3Labels();
+            }
             if (container == panelStep4 || container == this)
             {
                 AlignStep4Labels();
+            }
+        }
+
+        private void AlignStep3Labels()
+        {
+            if (this.RightToLeft != RightToLeft.Yes) return;
+
+            var lblProc = this.Controls.Find("labelNumberOfProcessors", true).FirstOrDefault() as Label;
+            var lblCores = this.Controls.Find("labelNumberOfCoresPerProcessor", true).FirstOrDefault() as Label;
+
+            if (lblProc != null && lblCores != null && lblProc.Parent != null && lblCores.Parent != null)
+            {
+                // הפחתה של 4 פיקסלים מזיזה את התוויות פיזית שמאלה במצב RTL
+                int shiftLeft = 4;
+
+                int rightEdgeProc = lblProc.Left + lblProc.Width;
+                lblProc.Left = lblProc.Left - shiftLeft;
+                lblCores.Left = (rightEdgeProc - shiftLeft) - lblCores.Width;
             }
         }
 
@@ -2739,6 +2768,7 @@ namespace VMware_VM_Generator
 
         private void Form1_Shown(object? sender, EventArgs e)
         {
+            AlignStep3Labels();
             AlignStep4Labels();
             RefreshSuffixLabels();
         }
@@ -3016,7 +3046,7 @@ namespace VMware_VM_Generator
             string lblFloppy = GetTr("SumLblFloppy", "Floppy Drives:");
             string lblCDIDE = GetTr("SumLblCDIDE", "CD/DVD Drives (IDE):");
             string lblCDSCSI = GetTr("SumLblCDSCSI", "CD/DVD Drives (SCSI):");
-            string lblCDSATA = GetTr("SumLblCDSATA", "CD/DVD Drives (SATA):");
+            string lblCDSATA = GetStr("SumLblCDSATA", "CD/DVD Drives (SATA):");
 
             txtSummary.Text =
               $"{headerSummary}\r\n\r\n" +
@@ -3030,7 +3060,7 @@ namespace VMware_VM_Generator
               $"• {lblMemory} {memoryStr}\r\n\r\n" +
               $"{sectionPeripherals}\r\n" +
               $"• {lblSound} {soundCard}\r\n" +
-              $"• {lblSCSI} {scsiController}\r\n\r\n" +
+              $"• {lblSCSI} {scsiController}\r\n" +
               $"{sectionDisk}\r\n" +
               $"• {lblType} {driveType}\r\n" +
               $"• {lblCapacity} {driveCapacity} GB\r\n" +
@@ -3044,5 +3074,6 @@ namespace VMware_VM_Generator
         }
 
         private string GetTest(string key, string def) => def;
+        private string GetStr(string key, string def) => def;
     }
 }
