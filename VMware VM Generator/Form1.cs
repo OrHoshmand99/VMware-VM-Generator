@@ -14,30 +14,25 @@ namespace VMware_VM_Generator
     {
         private IniFile ini = new IniFile("settings.ini");
 
-        // Flags and base path for dynamic folder naming based on VM name
         private bool isUserPathCustomized = false;
         private bool isUpdatingProgrammatically = false;
         private string baseVmDirectory = "";
         private string currentIconPath = "";
-        private int currentIconIndex = 0; // Track exact icon index selected by the user
+        private int currentIconIndex = 0;
 
-        // Pending action variables for post-wizard execution upon finishing
         private string pendingVmxPath = "";
         private string pendingVmFolder = "";
         private string pendingVmwarePath = "";
 
-        // Per-control suffix overrides loaded from language file
         private readonly Dictionary<string, string> controlRecommendedSuffix =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> controlNotSupportedSuffix =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        // Localized suffix texts (fallback to English defaults)
         private string localizedNotSupported = "(Not supported)";
         private string localizedNotAvailable = "(Not available)";
         private string localizedRecommended = "(Recommended)";
 
-        // Safe RTL title bar fix: title bar RTL with right-aligned text
         protected override CreateParams CreateParams
         {
             get
@@ -56,7 +51,6 @@ namespace VMware_VM_Generator
             }
         }
 
-        // Helper method to set title with proper RTL embedding
         private void SetFormTitle(string title)
         {
             if (string.IsNullOrEmpty(title))
@@ -88,7 +82,6 @@ namespace VMware_VM_Generator
         private int recommendedDefault;
         private int recommendedMax;
 
-        // P/Invoke for native Windows Icon Picker dialog and high-quality multi-resolution icon extraction
         [DllImport("shell32.dll", EntryPoint = "PickIconDlg", CharSet = CharSet.Auto)]
         private static extern bool PickIconDlg(IntPtr hwndOwner, StringBuilder pszIconPath, int cchIconPath, ref int piIconIndex);
 
@@ -126,7 +119,6 @@ namespace VMware_VM_Generator
         private IntPtr currentSmallIconHandle = IntPtr.Zero;
         private IntPtr currentLargeIconHandle = IntPtr.Zero;
 
-        // P/Invoke for reading PE resources to extract native icon layers and color depths
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
 
@@ -155,14 +147,12 @@ namespace VMware_VM_Generator
             InitializeComponent();
             pictureVMIcon.SizeMode = PictureBoxSizeMode.Zoom;
 
-            // Reduce flicker by enabling double-buffering and using WS_EX_COMPOSITED
             try
             {
                 this.UpdateStyles();
             }
             catch { }
 
-            // Ensure memory groupbox and label have no visible caption
             try
             {
                 memory.Text = "";
@@ -170,7 +160,6 @@ namespace VMware_VM_Generator
             }
             catch { }
 
-            // Enable double-buffering on container controls (reduce flicker) via non-public DoubleBuffered property
             try
             {
                 var prop = typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
@@ -189,46 +178,37 @@ namespace VMware_VM_Generator
             }
             catch { }
 
-            // Welcome screen buttons
             btnWelcomeBack.Click += btnWelcomeBack_Click;
             btnWelcomeNext.Click += btnWelcomeNext_Click;
             btnWelcomeCancel.Click += btnWelcomeCancel_Click;
 
-            // Step 1 buttons
             btnStep1Back.Click += btnStep1Back_Click;
             btnStep1Next.Click += btnStep1Next_Click;
             btnStep1Cancel.Click += btnStep1Cancel_Click;
 
-            // Step 2 buttons
             btnStep2Back.Click += btnStep2Back_Click;
             btnStep2Next.Click += btnStep2Next_Click;
             btnStep2Cancel.Click += btnStep2Cancel_Click;
 
-            // Restrict processor and core input fields to numeric characters only
             comboNumberOfProcessors.KeyPress += NumberOnly_KeyPress;
             comboBoxNumberOfCoresPerProcessor.KeyPress += NumberOnly_KeyPress;
 
-            // Step 3 buttons
             btnStep3Back.Click += (s, e) => ShowStep(2);
             btnStep3Next.Click += (s, e) => ShowStep(4);
             btnStep3Cancel.Click += (s, e) => Close();
 
-            // Step 4 buttons
             btnStep4Back.Click += (s, e) => ShowStep(3);
             btnStep4Next.Click += (s, e) => ShowStep(5);
             btnStep4Cancel.Click += (s, e) => Close();
 
-            // Step 5 buttons (Moves to Step 6: Shortcuts & Icons)
             btnStep5Back.Click += (s, e) => ShowStep(4);
             btnStep5Next.Click += (s, e) => ShowStep(6);
             btnStep5Cancel.Click += (s, e) => Close();
 
-            // Step 6 buttons (Shortcuts & Icons -> Generates summary and moves to Step 7)
             btnStep6Back.Click += (s, e) => ShowStep(5);
             btnStep6Cancel.Click += (s, e) => Close();
             btnStep6Next.Click += (s, e) => { GenerateSummary(); ShowStep(7); };
 
-            // Step 7 buttons (Summary & Create)
             btnStep7Back.Click += (s, e) => ShowStep(6);
             btnStep7Cancel.Click += (s, e) => Close();
             btnCreate.Click += (s, e) => {
@@ -251,15 +231,12 @@ namespace VMware_VM_Generator
                     else if (radioButtonE1000PCI.Checked) networkSelection = "e1000";
                     else if (radioButtonE1000PCIe.Checked) networkSelection = "e1000e";
 
-                    // Read hardware version from the INI file (Hardware Version section), fallback to "19" if empty
                     string hwVersionIni = ini.Read("HardwareVersion", "Hardware Version");
                     if (string.IsNullOrWhiteSpace(hwVersionIni)) hwVersionIni = "19";
 
-                    // Read OS-Type from settings.ini [General] section, fallback to "other-64" if empty
                     string osTypeIni = ini.Read("OS-Type", "General");
                     if (string.IsNullOrWhiteSpace(osTypeIni)) osTypeIni = "other-64";
 
-                    // Read ISO file path from [BootCD] section in settings.ini
                     string isoFileName = ini.Read("OS-ISO", "BootCD");
                     string isoFullPath = "";
                     if (!string.IsNullOrWhiteSpace(isoFileName))
@@ -269,16 +246,13 @@ namespace VMware_VM_Generator
                         isoFullPath = File.Exists(combinedPath) ? combinedPath : isoFileName;
                     }
 
-                    // Get processor count and cores per processor safely
                     int processors = comboNumberOfProcessors.SelectedItem is int p ? p : (int.TryParse(comboNumberOfProcessors.Text, out int parsedP) ? parsedP : 1);
                     int coresPerProcessor = comboBoxNumberOfCoresPerProcessor.SelectedItem is int c ? c : (int.TryParse(comboBoxNumberOfCoresPerProcessor.Text, out int parsedC) ? parsedC : 1);
 
-                    // Read CD/DVD counts from UI controls
                     int ideCdCount = (int)numericUpDownCDIDECount.Value;
                     int scsiCdCount = (int)numericUpDownCDSCSICount.Value;
                     int sataCdCount = (int)numericUpDownCDSATACount.Value;
 
-                    // Enforce minimum 1 drive for the controller hosting the boot OS ISO to prevent invalid 0 count
                     string bootController = ini.Read("OS-Controller", "BootCD").ToUpper();
                     if (!string.IsNullOrWhiteSpace(isoFullPath))
                     {
@@ -307,7 +281,7 @@ namespace VMware_VM_Generator
                         CoresPerSocket = coresPerProcessor,
 
                         Firmware = uefi.Checked ? "efi" : "bios",
-                        NetworkType = "nat", // Standard network connection mode
+                        NetworkType = "nat",
 
                         SoundVirtualDev = radioButtonSB16.Checked ? "sb16" :
                             radioButtonES1371.Checked ? "es1371" :
@@ -476,19 +450,17 @@ namespace VMware_VM_Generator
                     }
                     else if (radioShortcutPlayer != null && radioShortcutPlayer.Checked)
                     {
-                        // Launch via VMware Player
                         string vmplayerPath = Path.Combine(Path.GetDirectoryName(vmwarePath), "vmplayer.exe");
                         shortcutTarget = File.Exists(vmplayerPath) ? vmplayerPath : vmwarePath;
 
                         if (checkBoxFullScreen.Checked)
                         {
-                            shortcutArguments += "-X "; // Fullscreen switch support in Player
+                            shortcutArguments += "-X ";
                         }
                         shortcutArguments += $"\"{vmxFilePath}\"";
                     }
                     else
                     {
-                        // Launch via VMware Workstation
                         shortcutTarget = vmwarePath;
                         if (checkBoxNewWindow.Checked) shortcutArguments += "-n ";
                         if (checkBoxShortStart.Checked)
@@ -615,13 +587,11 @@ namespace VMware_VM_Generator
                 bool isWorkstation = radioShortcutWorkstation.Checked;
                 bool isPlayer = (radioShortcutPlayer != null && radioShortcutPlayer.Checked);
 
-                // Enable/disable Workstation switches
                 checkBoxNewWindow.Enabled = isWorkstation;
                 checkBoxShortStart.Enabled = isWorkstation;
                 checkBoxFullScreen.Enabled = isWorkstation && checkBoxShortStart.Checked;
                 checkBoxClose.Enabled = isWorkstation;
 
-                // Specific behavior for VMware Player: Fullscreen enabled, others disabled
                 if (isPlayer)
                 {
                     checkBoxFullScreen.Enabled = true;
@@ -630,7 +600,6 @@ namespace VMware_VM_Generator
                     checkBoxClose.Enabled = false;
                 }
 
-                // If Direct or KVM selected, disable all switches
                 if (!isWorkstation && !isPlayer)
                 {
                     checkBoxNewWindow.Enabled = false;
@@ -684,7 +653,6 @@ namespace VMware_VM_Generator
             numericUpDownCDSATACount.ValueChanged += numericUpDownCDSATACount_ValueChanged;
         }
 
-        // Restricts combobox keypress input to control keys and digits only
         private void NumberOnly_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
@@ -1545,7 +1513,6 @@ namespace VMware_VM_Generator
             bios.Text = "BIOS";
             uefi.Text = "UEFI";
 
-            // יישום הלוגיקה המדויקת: BIOS-f מבטל UEFI, ו-UEFI-f מבטל BIOS
             if (fw.Equals("BIOS-f", StringComparison.OrdinalIgnoreCase))
             {
                 bios.Enabled = true;
@@ -1583,8 +1550,8 @@ namespace VMware_VM_Generator
                 uefi.Enabled = true;
                 bios.Tag = null;
                 uefi.Tag = null;
-                uefi.Checked = true;
-                bios.Checked = false;
+                bios.Checked = true;
+                uefi.Checked = false;
             }
             else
             {
@@ -1616,7 +1583,6 @@ namespace VMware_VM_Generator
             ShowStep(0);
             trackBarMemory.TickStyle = TickStyle.None;
 
-            // --- Validate VMware executables existence and assign (Not available) if missing ---
             string vmwarePath = GetVmwarePath();
             string vmwareDir = Path.GetDirectoryName(vmwarePath);
 
@@ -1631,12 +1597,10 @@ namespace VMware_VM_Generator
             }
             radioShortcutKvm.Enabled = hasKvm;
 
-            // Executables missing from disk get (Not available)
             if (!hasVmware) radioShortcutWorkstation.Tag = localizedNotAvailable;
             if (radioShortcutPlayer != null && !hasVmplayer) radioShortcutPlayer.Tag = localizedNotAvailable;
             if (!hasKvm) radioShortcutKvm.Tag = localizedNotAvailable;
 
-            // Fallback to radioShortcutDirect as default if specific shortcut executables are unavailable
             if (!radioShortcutWorkstation.Enabled && (!radioShortcutPlayer?.Enabled ?? true) && !radioShortcutKvm.Enabled)
             {
                 radioShortcutDirect.Checked = true;
@@ -1648,7 +1612,6 @@ namespace VMware_VM_Generator
                 else radioShortcutDirect.Checked = true;
             }
 
-            // --- Network settings initialization (Using Not supported if disabled in INI) ---
             string networkDefault = ini.Read("DefaultNetwork", "Network").ToLower();
 
             string pcnet32Enabled = ini.Read("PCNet32", "Network");
@@ -1759,7 +1722,6 @@ namespace VMware_VM_Generator
                     break;
             }
 
-            // --- Sound card settings initialization ---
             string soundDefault = ini.Read("DefaultSoundCard", "Sound Card").ToLower();
 
             string sb16Enabled = ini.Read("SB16", "Sound Card");
@@ -1791,7 +1753,6 @@ namespace VMware_VM_Generator
             if (!radioButtonHDAudio.Enabled)
                 radioButtonHDAudio.Tag = localizedNotSupported;
 
-            // --- Virtual drive settings initialization ---
             string driveDefault = ini.Read("DefaultDriveType", "Virtual Drive").ToLower();
 
             string ideEnabled = ini.Read("IDE", "Virtual Drive");
@@ -2282,6 +2243,11 @@ namespace VMware_VM_Generator
                             c.BringToFront();
                     }
 
+                    if (step == 4)
+                    {
+                        AlignStep4Labels();
+                    }
+
                     RefreshSuffixLabels();
 
                     activePanel.Invalidate(true);
@@ -2433,6 +2399,19 @@ namespace VMware_VM_Generator
             int right = trackBarMemory.Right - 13;
             int y = trackBarMemory.Top + trackBarMemory.Height - 3;
 
+            Color tickColor = Color.Black;
+            try
+            {
+                string colorName = ini.Read("TextColor", "UI");
+                if (!string.IsNullOrWhiteSpace(colorName))
+                {
+                    tickColor = ColorTranslator.FromHtml(colorName);
+                }
+            }
+            catch { }
+
+            using (Pen tickPen = new Pen(tickColor, 1))
+            using (SolidBrush textBrush = new SolidBrush(tickColor))
             using (Font smallFont = new Font(this.Font.FontFamily, 7))
             {
                 for (int i = 0; i < memoryStops.Length; i++)
@@ -2442,10 +2421,10 @@ namespace VMware_VM_Generator
                     int sliderPos = (int)(t * trackBarMemory.Maximum);
                     int x = left + (int)((right - left) * (sliderPos / (double)trackBarMemory.Maximum));
 
-                    g.DrawLine(Pens.Black, x, y, x, y + 6);
+                    g.DrawLine(tickPen, x, y, x, y + 6);
                     string label = mb < 1024 ? $"{mb} MB" : $"{mb / 1024} GB";
                     SizeF textSize = g.MeasureString(label, smallFont);
-                    g.DrawString(label, smallFont, Brushes.Black, x - textSize.Width / 2, y + 8);
+                    g.DrawString(label, smallFont, textBrush, x - textSize.Width / 2, y + 8);
 
                     tickHitBoxes[i] = new Rectangle(x - 10, y, 20, 20);
                 }
@@ -2622,7 +2601,10 @@ namespace VMware_VM_Generator
             foreach (Control ctrl in this.Controls)
                 ApplyDirectionToControl(ctrl, rtl);
 
-            if (rtl) MirrorControls(this);
+            if (rtl)
+            {
+                MirrorControls(this);
+            }
 
             try
             {
@@ -2659,9 +2641,86 @@ namespace VMware_VM_Generator
             {
                 if (ctrl == trackBarMemory) continue;
                 if (ctrl is PictureBox pb && pb.Name.EndsWith("TopRight")) continue;
+
+                bool isQuantityLabel = ctrl.Name.StartsWith("labelNumberOf", StringComparison.OrdinalIgnoreCase);
+                bool isNumericUpDown = ctrl.Name.StartsWith("numericUpDownCD", StringComparison.OrdinalIgnoreCase) ||
+                                       ctrl.Name.Equals("numericUpDownFloppyCount", StringComparison.OrdinalIgnoreCase);
+
                 int newX = width - ctrl.Left - ctrl.Width;
+
+                if (isQuantityLabel || isNumericUpDown)
+                {
+                    ctrl.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+                }
+                else
+                {
+                    AnchorStyles anchor = ctrl.Anchor;
+                    if ((anchor & AnchorStyles.Left) == AnchorStyles.Left && (anchor & AnchorStyles.Right) != AnchorStyles.Right)
+                    {
+                        ctrl.Anchor = (anchor & ~AnchorStyles.Left) | AnchorStyles.Right;
+                    }
+                    else if ((anchor & AnchorStyles.Right) == AnchorStyles.Right && (anchor & AnchorStyles.Left) != AnchorStyles.Left)
+                    {
+                        ctrl.Anchor = (anchor & ~AnchorStyles.Right) | AnchorStyles.Left;
+                    }
+                }
+
                 ctrl.Left = newX;
-                if (ctrl.Controls.Count > 0) MirrorControls(ctrl);
+
+                if (ctrl.Controls.Count > 0 && !(ctrl is ComboBox || ctrl is NumericUpDown || ctrl is TrackBar))
+                {
+                    MirrorControls(ctrl);
+                }
+            }
+
+            if (container == panelStep4 || container == this)
+            {
+                AlignStep4Labels();
+            }
+        }
+
+        private void AlignStep4Labels()
+        {
+            if (this.RightToLeft != RightToLeft.Yes) return;
+
+            var pairs = new[] {
+                ("labelNumberOfFloppy", "iconFloppy"),
+                ("labelNumberOfCDIDE", "iconCDIDE"),
+                ("labelNumberOfCDSCSI", "iconCDSCSI"),
+                ("labelNumberOfCDSATA", "iconCDSATA")
+            };
+
+            int targetRight = int.MaxValue;
+            bool foundAny = false;
+
+            foreach (var (lblName, iconName) in pairs)
+            {
+                var lbl = this.Controls.Find(lblName, true).FirstOrDefault() as Label;
+                var icon = this.Controls.Find(iconName, true).FirstOrDefault() as PictureBox;
+                if (lbl != null && icon != null && lbl.Parent != null && icon.Parent != null)
+                {
+                    Point iconScreenPt = icon.Parent.PointToScreen(new Point(icon.Left, 0));
+                    Point lblParentPt = lbl.Parent.PointToClient(iconScreenPt);
+
+                    int candidateRight = lblParentPt.X - 10;
+                    if (!foundAny || candidateRight < targetRight)
+                    {
+                        targetRight = candidateRight;
+                        foundAny = true;
+                    }
+                }
+            }
+
+            if (foundAny && targetRight != int.MaxValue)
+            {
+                foreach (var (lblName, iconName) in pairs)
+                {
+                    var lbl = this.Controls.Find(lblName, true).FirstOrDefault() as Label;
+                    if (lbl != null)
+                    {
+                        lbl.Left = targetRight - lbl.Width;
+                    }
+                }
             }
         }
 
@@ -2680,6 +2739,7 @@ namespace VMware_VM_Generator
 
         private void Form1_Shown(object? sender, EventArgs e)
         {
+            AlignStep4Labels();
             RefreshSuffixLabels();
         }
 
@@ -2695,7 +2755,6 @@ namespace VMware_VM_Generator
                 }
             }
 
-            // Hardware, Firmware and controller options suffix rendering
             AppendSuffixLabelForControlByName("bios", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("uefi", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioBusLogic", localizedNotSupported, localizedRecommended);
@@ -2714,7 +2773,6 @@ namespace VMware_VM_Generator
             AppendSuffixLabelForControlByName("radioButtonE1000PCI", localizedNotSupported, localizedRecommended);
             AppendSuffixLabelForControlByName("radioButtonE1000PCIe", localizedNotSupported, localizedRecommended);
 
-            // Shortcut executables availability suffix rendering (showing Not Available when missing)
             AppendSuffixLabelForControlByName("radioShortcutWorkstation", localizedNotAvailable, localizedRecommended);
             if (radioShortcutPlayer != null)
             {
@@ -2953,7 +3011,7 @@ namespace VMware_VM_Generator
             string valYes = GetTr("SumValYes", "Yes");
             string valNo = GetTr("SumValNo", "No");
             string valSplit = GetTr("SumValSplit", "Split into multiple files");
-            string valSingle = GetTr("SumValSingle", "Single file");
+            string valSingle = GetTest("SumValSingle", "Single file");
             string sectionRemovable = GetTr("SumSecRemovable", "[Removable Media / Drives]");
             string lblFloppy = GetTr("SumLblFloppy", "Floppy Drives:");
             string lblCDIDE = GetTr("SumLblCDIDE", "CD/DVD Drives (IDE):");
@@ -2984,5 +3042,7 @@ namespace VMware_VM_Generator
               $"• {lblCDSCSI} {cdSCSICount}\r\n" +
               $"• {lblCDSATA} {cdSATACount}\r\n";
         }
+
+        private string GetTest(string key, string def) => def;
     }
 }
