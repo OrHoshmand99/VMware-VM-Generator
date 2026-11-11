@@ -2233,7 +2233,8 @@ namespace VMware_VM_Generator
                             }
                             if (step == 0) FixIcon(iconWelcome);
                             if (step == 1) FixIcon(iconFolder);
-                            if (step == 3) FixIcon(iconProcessor);
+                            if (step == 2) FixIcon(iconProcessor);
+                            if (step == 3) FixIcon(iconSCSI);
                             if (step == 4) FixIcon(iconHardDrive);
                             if (step == 8) FixIcon(iconFinish);
                         }
@@ -2699,7 +2700,7 @@ namespace VMware_VM_Generator
 
             if (lblProc != null && lblCores != null && lblProc.Parent != null && lblCores.Parent != null)
             {
-                // הפחתה של 4 פיקסלים מזיזה את התוויות פיזית שמאלה במצב RTL
+                // Shifting labels left by 4 pixels physically in RTL mode
                 int shiftLeft = 4;
 
                 int rightEdgeProc = lblProc.Left + lblProc.Width;
